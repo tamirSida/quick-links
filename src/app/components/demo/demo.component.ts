@@ -1,20 +1,38 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ThemeService, Theme } from '../../services/theme.service';
-import { LinksService } from '../../services/links.service';
-import { AuthService } from '../../services/auth.service';
 import { QuickLink } from '../../models/link.model';
 import { LinkWizardComponent } from '../link-wizard/link-wizard.component';
 import { LinkCardComponent } from '../link-card/link-card.component';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-demo',
   standalone: true,
   imports: [CommonModule, FormsModule, LinkWizardComponent, LinkCardComponent],
   template: `
-    <div class="dashboard">
+    <div class="demo">
+      <div class="demo-banner">
+        <div class="container">
+          <div class="demo-banner-content">
+            <div class="demo-info">
+              <h2>
+                <i class="fas fa-eye"></i>
+                Demo Mode
+              </h2>
+              <p>You're viewing a demo with sample data. Changes won't be saved.</p>
+            </div>
+            <div class="demo-actions">
+              <button class="btn btn-secondary" (click)="goToSignIn()">
+                <i class="fas fa-sign-in-alt"></i>
+                Sign In for Real Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <header class="dashboard-header">
         <div class="container">
           <div class="header-content">
@@ -73,19 +91,6 @@ import { LinkCardComponent } from '../link-card/link-card.component';
                     <i class="fas fa-plus"></i>
                   </button>
                 </div>
-
-                <div class="sign-out-section">
-                  <label class="add-link-label">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Account
-                  </label>
-                  <button 
-                    class="btn btn-secondary sign-out-btn"
-                    (click)="signOut()"
-                    title="Sign Out">
-                    <i class="fas fa-sign-out-alt"></i>
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -129,25 +134,6 @@ import { LinkCardComponent } from '../link-card/link-card.component';
               </app-link-card>
             </div>
           </div>
-
-          <div class="empty-state" *ngIf="filteredLinks.length === 0">
-            <div class="empty-state-content">
-              <i class="fas fa-link empty-icon"></i>
-              <h3>No links found</h3>
-              <p *ngIf="searchQuery || selectedTags.length > 0">
-                Try adjusting your search or filters
-              </p>
-              <p *ngIf="!searchQuery && selectedTags.length === 0">
-                Get started by adding your first quick link
-              </p>
-              <button 
-                class="btn btn-primary mt-4"
-                (click)="showWizard = true">
-                <i class="fas fa-plus"></i>
-                Add Your First Link
-              </button>
-            </div>
-          </div>
         </div>
       </main>
     </div>
@@ -160,6 +146,50 @@ import { LinkCardComponent } from '../link-card/link-card.component';
     </app-link-wizard>
   `,
   styles: [`
+    .demo-banner {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      padding: 1rem 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .demo-banner-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .demo-info h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .demo-info p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 0.875rem;
+    }
+
+    .demo-actions .btn {
+      font-size: 0.875rem;
+      padding: 0.625rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+
+    .demo-actions .btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: none;
+    }
+
+    /* Reuse dashboard styles */
     .dashboard-header {
       background: linear-gradient(135deg, var(--surface-color) 0%, var(--background-color) 100%);
       border-bottom: 1px solid var(--border-color);
@@ -207,16 +237,15 @@ import { LinkCardComponent } from '../link-card/link-card.component';
 
     .actions-grid {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto;
       gap: 2.5rem;
       align-items: end;
       width: 100%;
-      min-width: 350px;
+      min-width: 300px;
     }
 
     .theme-selector,
-    .add-link-section,
-    .sign-out-section {
+    .add-link-section {
       position: relative;
     }
 
@@ -424,29 +453,6 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       font-size: 1.25rem;
     }
 
-    .sign-out-btn {
-      width: 100%;
-      min-width: 3.5rem;
-      height: 3.5rem;
-      padding: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-      border-radius: var(--radius-lg);
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .sign-out-btn:hover {
-      transform: translateY(-2px);
-    }
-
-    .sign-out-btn i {
-      font-size: 1.25rem;
-    }
-
     .dashboard-main {
       padding: 2rem 0;
     }
@@ -509,53 +515,13 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       margin-top: 2rem;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 4rem 1rem;
-    }
-
-    .empty-state-content {
-      max-width: 400px;
-      margin: 0 auto;
-    }
-
-    .empty-icon {
-      font-size: 4rem;
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-    }
-
-    .empty-state h3 {
-      font-size: 1.5rem;
-      color: var(--text-primary);
-      margin-bottom: 0.5rem;
-    }
-
-    .empty-state p {
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-    }
-
-    @media (max-width: 968px) {
-      .header-content {
-        gap: 2rem;
-        padding: 0 1rem;
-      }
-
-      .dashboard-title {
-        font-size: 2rem;
-      }
-
-      .header-actions {
-        gap: 1.5rem;
-      }
-
-      .theme-dropdown {
-        min-width: 160px;
-      }
-    }
-
     @media (max-width: 768px) {
+      .demo-banner-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
       .dashboard-header {
         padding: 1.5rem 0;
       }
@@ -577,30 +543,6 @@ import { LinkCardComponent } from '../link-card/link-card.component';
         gap: 1.5rem;
         min-width: auto;
       }
-
-      .theme-dropdown {
-        min-width: 160px;
-      }
-
-      .add-link-btn {
-        min-width: 3rem;
-        height: 3rem;
-        font-size: 1rem;
-      }
-
-      .add-link-btn i {
-        font-size: 1rem;
-      }
-
-      .search-box {
-        max-width: none;
-      }
-
-      .tags-filter {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-      }
     }
 
     @media (max-width: 480px) {
@@ -619,14 +561,10 @@ import { LinkCardComponent } from '../link-card/link-card.component';
         height: 3rem;
         margin: 0 auto;
       }
-
-      .theme-dropdown {
-        min-width: auto;
-      }
     }
   `]
 })
-export class DashboardComponent implements OnInit {
+export class DemoComponent implements OnInit {
   showWizard = false;
   editingLink: QuickLink | null = null;
   currentTheme: Theme = 'light';
@@ -652,6 +590,117 @@ export class DashboardComponent implements OnInit {
     { value: 'warm' as Theme, name: 'Warm', primary: '#dc2626', secondary: '#ea580c', background: '#fefaf8' }
   ];
 
+  constructor(
+    private themeService: ThemeService,
+    private router: Router
+  ) {}
+
+  ngOnInit() {
+    this.currentTheme = this.themeService.getCurrentTheme();
+    this.themeService.theme$.subscribe(theme => {
+      this.currentTheme = theme;
+    });
+    
+    this.loadDemoData();
+    this.updateFilteredLinks();
+  }
+
+  private loadDemoData() {
+    // Sample developer links for demo
+    this.links = [
+      {
+        id: '1',
+        title: 'GitHub',
+        description: 'Source code repositories and collaboration',
+        url: 'https://github.com',
+        icon: 'fab fa-github',
+        tags: ['development', 'git', 'collaboration'],
+        userId: 'demo',
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date('2024-01-15')
+      },
+      {
+        id: '2',
+        title: 'VS Code',
+        description: 'Visual Studio Code - code editor',
+        url: 'https://code.visualstudio.com',
+        icon: 'fas fa-code',
+        tags: ['development', 'editor', 'tools'],
+        userId: 'demo',
+        createdAt: new Date('2024-01-20'),
+        updatedAt: new Date('2024-01-20')
+      },
+      {
+        id: '3',
+        title: 'Stack Overflow',
+        description: 'Programming Q&A community',
+        url: 'https://stackoverflow.com',
+        icon: 'fab fa-stack-overflow',
+        tags: ['development', 'help', 'community'],
+        userId: 'demo',
+        createdAt: new Date('2024-01-25'),
+        updatedAt: new Date('2024-01-25')
+      },
+      {
+        id: '4',
+        title: 'Docker Hub',
+        description: 'Container images and registry',
+        url: 'https://hub.docker.com',
+        icon: 'fab fa-docker',
+        tags: ['devops', 'containers', 'deployment'],
+        userId: 'demo',
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date('2024-02-01')
+      },
+      {
+        id: '5',
+        title: 'AWS Console',
+        description: 'Amazon Web Services dashboard',
+        url: 'https://console.aws.amazon.com',
+        icon: 'fab fa-aws',
+        tags: ['cloud', 'aws', 'infrastructure'],
+        userId: 'demo',
+        createdAt: new Date('2024-02-05'),
+        updatedAt: new Date('2024-02-05')
+      },
+      {
+        id: '6',
+        title: 'Figma',
+        description: 'Design and prototyping tool',
+        url: 'https://figma.com',
+        icon: 'fas fa-paint-brush',
+        tags: ['design', 'ui', 'prototyping'],
+        userId: 'demo',
+        createdAt: new Date('2024-02-10'),
+        updatedAt: new Date('2024-02-10')
+      },
+      {
+        id: '7',
+        title: 'Notion',
+        description: 'Note-taking and project management',
+        url: 'https://notion.so',
+        icon: 'fas fa-sticky-note',
+        tags: ['productivity', 'notes', 'planning'],
+        userId: 'demo',
+        createdAt: new Date('2024-02-15'),
+        updatedAt: new Date('2024-02-15')
+      },
+      {
+        id: '8',
+        title: 'MongoDB Atlas',
+        description: 'Cloud database service',
+        url: 'https://cloud.mongodb.com',
+        icon: 'fas fa-database',
+        tags: ['database', 'mongodb', 'cloud'],
+        userId: 'demo',
+        createdAt: new Date('2024-02-20'),
+        updatedAt: new Date('2024-02-20')
+      }
+    ];
+    
+    this.updateAvailableTags();
+  }
+
   getCurrentThemeColors() {
     const style = getComputedStyle(document.documentElement);
     return {
@@ -665,28 +714,6 @@ export class DashboardComponent implements OnInit {
     return style.getPropertyValue('--background-color').trim();
   }
 
-
-  constructor(
-    private themeService: ThemeService,
-    private linksService: LinksService,
-    private authService: AuthService,
-    private router: Router
-  ) {}
-
-  ngOnInit() {
-    this.currentTheme = this.themeService.getCurrentTheme();
-    this.themeService.theme$.subscribe(theme => {
-      this.currentTheme = theme;
-    });
-    
-    // Subscribe to links from the service
-    this.linksService.getUserLinks().subscribe(links => {
-      this.links = links;
-      this.updateFilteredLinks();
-      this.updateAvailableTags();
-    });
-  }
-
   toggleThemeDropdown() {
     this.themeDropdownOpen = !this.themeDropdownOpen;
   }
@@ -696,26 +723,9 @@ export class DashboardComponent implements OnInit {
     this.themeDropdownOpen = false;
   }
 
-  getThemeColor(theme: Theme): string {
-    if (theme === this.currentTheme) {
-      return this.getCurrentThemeColors().primary;
-    }
-    const themeData = this.themes.find(t => t.value === theme);
-    return themeData ? themeData.primary : '#667eea';
-  }
-
   getThemeName(theme: Theme): string {
     const themeData = this.themes.find(t => t.value === theme);
     return themeData ? themeData.name : 'Light';
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event) {
-    const target = event.target as HTMLElement;
-    const dropdown = target.closest('.theme-dropdown');
-    if (!dropdown && this.themeDropdownOpen) {
-      this.themeDropdownOpen = false;
-    }
   }
 
   onSearchChange() {
@@ -760,31 +770,34 @@ export class DashboardComponent implements OnInit {
     this.showWizard = true;
   }
 
-  async deleteLink(linkId: string) {
-    if (confirm('Are you sure you want to delete this link?')) {
-      try {
-        await this.linksService.deleteLink(linkId);
-        // The service will automatically update the links observable
-      } catch (error) {
-        console.error('Error deleting link:', error);
-        alert('Failed to delete link. Please try again.');
-      }
+  deleteLink(linkId: string) {
+    if (confirm('Delete this demo link? (This is just for demo purposes)')) {
+      this.links = this.links.filter(link => link.id !== linkId);
+      this.updateFilteredLinks();
+      this.updateAvailableTags();
     }
   }
 
-  async onLinkSave(linkData: any) {
-    try {
-      if (this.editingLink) {
-        await this.linksService.updateLink(this.editingLink.id, linkData);
-      } else {
-        await this.linksService.addLink(linkData);
+  onLinkSave(linkData: any) {
+    if (this.editingLink) {
+      const index = this.links.findIndex(link => link.id === this.editingLink!.id);
+      if (index > -1) {
+        this.links[index] = { ...this.editingLink, ...linkData, updatedAt: new Date() };
       }
-      // The service will automatically update the links observable
-      this.onWizardCancel();
-    } catch (error) {
-      console.error('Error saving link:', error);
-      alert('Failed to save link. Please try again.');
+    } else {
+      const newLink: QuickLink = {
+        id: Date.now().toString(),
+        ...linkData,
+        userId: 'demo',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      this.links.push(newLink);
     }
+    
+    this.updateFilteredLinks();
+    this.updateAvailableTags();
+    this.onWizardCancel();
   }
 
   onWizardCancel() {
@@ -792,15 +805,9 @@ export class DashboardComponent implements OnInit {
     this.editingLink = null;
   }
 
-  async signOut() {
-    try {
-      await this.authService.signOut();
-      this.router.navigate(['/']);
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  goToSignIn() {
+    this.router.navigate(['/']);
   }
-
 
   private updateAvailableTags() {
     const tagSet = new Set<string>();
@@ -808,6 +815,5 @@ export class DashboardComponent implements OnInit {
       link.tags.forEach(tag => tagSet.add(tag));
     });
     this.availableTags = Array.from(tagSet).sort();
-    localStorage.setItem('quickLinks', JSON.stringify(this.links));
   }
 }

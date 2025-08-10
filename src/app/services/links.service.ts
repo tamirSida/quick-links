@@ -1,10 +1,20 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { 
+  collection,
+  query,
+  where,
+  orderBy,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  Timestamp
+} from 'firebase/firestore';
+import { firestore } from './firebase';
 import { QuickLink, CreateLinkRequest } from '../models/link.model';
 import { AuthService } from './auth.service';
-
-// This is a placeholder service for Firestore operations
-// Once Firebase is set up, you can replace this with actual Firestore calls
 
 @Injectable({
   providedIn: 'root'
@@ -12,9 +22,22 @@ import { AuthService } from './auth.service';
 export class LinksService {
   private linksSubject = new BehaviorSubject<QuickLink[]>([]);
   public links$ = this.linksSubject.asObservable();
+  private linksCollection = collection(firestore, 'links');
+  private unsubscribe: (() => void) | null = null;
 
   constructor(private authService: AuthService) {
-    this.loadLinks();
+    // Subscribe to auth state changes and load links accordingly
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.loadUserLinks(user.uid);
+      } else {
+        this.linksSubject.next([]);
+        if (this.unsubscribe) {
+          this.unsubscribe();
+          this.unsubscribe = null;
+        }
+      }
+    });
   }
 
   // Get all links for current user
@@ -27,87 +50,112 @@ export class LinksService {
     const user = this.authService.getCurrentUser();
     if (!user) throw new Error('User not authenticated');
 
-    const newLink: QuickLink = {
-      id: Date.now().toString(), // In production, Firestore will generate this
-      ...linkData,
-      userId: user.uid,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
+    try {
+      const linkToAdd = {
+        ...linkData,
+        userId: user.uid,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now()
+      };
 
-    const currentLinks = this.linksSubject.value;
-    const updatedLinks = [...currentLinks, newLink];
-    this.linksSubject.next(updatedLinks);
-    this.saveToLocalStorage(updatedLinks);
+      const docRef = await addDoc(this.linksCollection, linkToAdd);
+      
+      const newLink: QuickLink = {
+        id: docRef.id,
+        ...linkData,
+        userId: user.uid,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
 
-    // TODO: Replace with Firestore add operation
-    // return await this.firestore.collection('links').add(newLink);
-
-    return newLink;
+      return newLink;
+    } catch (error: any) {
+      console.error('Error adding link:', error);
+      throw new Error('Failed to add link');
+    }
   }
 
   // Update existing link
   async updateLink(id: string, linkData: Partial<CreateLinkRequest>): Promise<QuickLink> {
-    const currentLinks = this.linksSubject.value;
-    const linkIndex = currentLinks.findIndex(link => link.id === id);
-    
-    if (linkIndex === -1) throw new Error('Link not found');
+    const user = this.authService.getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
 
-    const updatedLink: QuickLink = {
-      ...currentLinks[linkIndex],
-      ...linkData,
-      updatedAt: new Date()
-    };
+    try {
+      const linkRef = doc(firestore, 'links', id);
+      await updateDoc(linkRef, {
+        ...linkData,
+        updatedAt: Timestamp.now()
+      });
 
-    const updatedLinks = [...currentLinks];
-    updatedLinks[linkIndex] = updatedLink;
-    this.linksSubject.next(updatedLinks);
-    this.saveToLocalStorage(updatedLinks);
+      const currentLinks = this.linksSubject.value;
+      const linkIndex = currentLinks.findIndex(link => link.id === id);
+      
+      if (linkIndex === -1) throw new Error('Link not found');
 
-    // TODO: Replace with Firestore update operation
-    // await this.firestore.collection('links').doc(id).update(linkData);
+      const updatedLink: QuickLink = {
+        ...currentLinks[linkIndex],
+        ...linkData,
+        updatedAt: new Date()
+      };
 
-    return updatedLink;
+      return updatedLink;
+    } catch (error: any) {
+      console.error('Error updating link:', error);
+      throw new Error('Failed to update link');
+    }
   }
 
   // Delete link
   async deleteLink(id: string): Promise<void> {
-    const currentLinks = this.linksSubject.value;
-    const updatedLinks = currentLinks.filter(link => link.id !== id);
-    this.linksSubject.next(updatedLinks);
-    this.saveToLocalStorage(updatedLinks);
+    const user = this.authService.getCurrentUser();
+    if (!user) throw new Error('User not authenticated');
 
-    // TODO: Replace with Firestore delete operation
-    // await this.firestore.collection('links').doc(id).delete();
+    try {
+      const linkRef = doc(firestore, 'links', id);
+      await deleteDoc(linkRef);
+    } catch (error: any) {
+      console.error('Error deleting link:', error);
+      throw new Error('Failed to delete link');
+    }
   }
 
-  // Load links from localStorage (temporary solution)
-  private loadLinks(): void {
-    const user = this.authService.getCurrentUser();
-    if (!user) return;
-
-    const savedLinks = localStorage.getItem(`quickLinks_${user.uid}`);
-    if (savedLinks) {
-      const links = JSON.parse(savedLinks).map((link: any) => ({
-        ...link,
-        createdAt: new Date(link.createdAt),
-        updatedAt: new Date(link.updatedAt)
-      }));
-      this.linksSubject.next(links);
+  // Load links for a specific user with real-time updates
+  private loadUserLinks(userId: string): void {
+    if (this.unsubscribe) {
+      this.unsubscribe();
     }
 
-    // TODO: Replace with Firestore query
-    // const links = await this.firestore
-    //   .collection('links')
-    //   .where('userId', '==', user.uid)
-    //   .get();
+    const userLinksQuery = query(
+      this.linksCollection,
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    );
+
+    this.unsubscribe = onSnapshot(userLinksQuery, (snapshot) => {
+      const links: QuickLink[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data['title'],
+          description: data['description'],
+          url: data['url'],
+          icon: data['icon'],
+          tags: data['tags'] || [],
+          userId: data['userId'],
+          createdAt: data['createdAt'] ? data['createdAt'].toDate() : new Date(),
+          updatedAt: data['updatedAt'] ? data['updatedAt'].toDate() : new Date()
+        };
+      });
+      this.linksSubject.next(links);
+    }, (error) => {
+      console.error('Error loading links:', error);
+    });
   }
 
-  // Save to localStorage (temporary solution)
-  private saveToLocalStorage(links: QuickLink[]): void {
-    const user = this.authService.getCurrentUser();
-    if (user) {
-      localStorage.setItem(`quickLinks_${user.uid}`, JSON.stringify(links));
+  // Clean up subscription when service is destroyed
+  ngOnDestroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
     }
   }
 }

@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-// This is a placeholder service for Firebase Authentication
-// Once Firebase is set up, you can replace this with actual Firebase Auth
+import { 
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  User as FirebaseUser
+} from 'firebase/auth';
+import { auth } from './firebase';
 
 export interface User {
   uid: string;
@@ -18,29 +23,55 @@ export class AuthService {
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    // For development, simulate a logged-in user
-    const mockUser: User = {
-      uid: 'demo-user',
-      email: 'demo@example.com',
-      displayName: 'Demo User'
-    };
-    this.currentUserSubject.next(mockUser);
+    // Listen to Firebase Auth state changes
+    onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const user: User = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email || '',
+          displayName: firebaseUser.displayName || undefined
+        };
+        this.currentUserSubject.next(user);
+      } else {
+        this.currentUserSubject.next(null);
+      }
+    });
   }
 
-  // Placeholder methods - replace with Firebase Auth implementation
   async signInWithEmailAndPassword(email: string, password: string): Promise<User> {
-    // TODO: Implement Firebase Auth
-    throw new Error('Firebase Auth not implemented yet');
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email, password);
+      const user: User = {
+        uid: credential.user.uid,
+        email: credential.user.email || '',
+        displayName: credential.user.displayName || undefined
+      };
+      return user;
+    } catch (error: any) {
+      throw error;
+    }
   }
 
   async createUserWithEmailAndPassword(email: string, password: string): Promise<User> {
-    // TODO: Implement Firebase Auth
-    throw new Error('Firebase Auth not implemented yet');
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      const user: User = {
+        uid: credential.user.uid,
+        email: credential.user.email || '',
+        displayName: credential.user.displayName || undefined
+      };
+      return user;
+    } catch (error: any) {
+      throw error;
+    }
   }
 
   async signOut(): Promise<void> {
-    // TODO: Implement Firebase Auth
-    this.currentUserSubject.next(null);
+    try {
+      await signOut(auth);
+    } catch (error: any) {
+      throw error;
+    }
   }
 
   getCurrentUser(): User | null {
