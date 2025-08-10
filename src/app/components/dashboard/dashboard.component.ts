@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ThemeService, Theme } from '../../services/theme.service';
@@ -21,25 +21,52 @@ import { LinkCardComponent } from '../link-card/link-card.component';
             </h1>
             
             <div class="header-actions">
-              <div class="theme-selector">
-                <label class="form-label">Theme</label>
-                <select 
-                  class="form-select theme-select"
-                  [value]="currentTheme"
-                  (change)="onThemeChange($event)">
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="ocean">Ocean</option>
-                  <option value="forest">Forest</option>
-                </select>
+              <div class="actions-grid">
+                <div class="theme-selector">
+                  <label class="theme-label">
+                    <i class="fas fa-palette"></i>
+                    Theme
+                  </label>
+                  <div class="theme-dropdown" [class.open]="themeDropdownOpen">
+                    <button 
+                      class="theme-current"
+                      (click)="toggleThemeDropdown()">
+                      <div class="theme-preview">
+                        <div class="theme-color" [style.background]="getCurrentThemeColors().primary"></div>
+                        <span class="theme-name">{{ getThemeName(currentTheme) }}</span>
+                      </div>
+                      <i class="fas fa-chevron-down" [class.rotated]="themeDropdownOpen"></i>
+                    </button>
+                    <div class="theme-options" *ngIf="themeDropdownOpen">
+                      <button 
+                        *ngFor="let theme of themes"
+                        class="theme-option"
+                        [class.active]="theme.value === currentTheme"
+                        (click)="selectTheme(theme.value)">
+                        <div class="theme-colors">
+                          <div class="color-primary" [style.background]="theme.primary"></div>
+                          <div class="color-secondary" [style.background]="theme.secondary"></div>
+                        </div>
+                        <span class="theme-option-name">{{ theme.name }}</span>
+                        <i class="fas fa-check" *ngIf="theme.value === currentTheme"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="add-link-section">
+                  <label class="add-link-label">
+                    <i class="fas fa-plus-circle"></i>
+                    Add
+                  </label>
+                  <button 
+                    class="btn btn-primary add-link-btn"
+                    (click)="showWizard = true"
+                    title="Add Link">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
               </div>
-              
-              <button 
-                class="btn btn-primary"
-                (click)="showWizard = true">
-                <i class="fas fa-plus"></i>
-                Add Link
-              </button>
             </div>
           </div>
         </div>
@@ -114,46 +141,252 @@ import { LinkCardComponent } from '../link-card/link-card.component';
   `,
   styles: [`
     .dashboard-header {
-      background-color: var(--surface-color);
+      background: linear-gradient(135deg, var(--surface-color) 0%, var(--background-color) 100%);
       border-bottom: 1px solid var(--border-color);
-      padding: 1.5rem 0;
+      padding: 2.5rem 0;
       position: sticky;
       top: 0;
       z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(10px);
     }
 
     .header-content {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 2rem;
+      gap: 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
     }
 
     .dashboard-title {
-      font-size: 1.875rem;
-      font-weight: 700;
+      font-size: 2.25rem;
+      font-weight: 800;
       color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      gap: 1rem;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     .dashboard-title i {
-      color: var(--primary-color);
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
     }
 
     .header-actions {
       display: flex;
       align-items: center;
-      gap: 1.5rem;
     }
 
-    .theme-selector {
-      min-width: 120px;
+    .actions-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2.5rem;
+      align-items: end;
+      width: 100%;
+      min-width: 300px;
     }
 
-    .theme-select {
-      margin-top: 0.25rem;
+    .theme-selector,
+    .add-link-section {
+      position: relative;
+    }
+
+    .theme-label,
+    .add-link-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .theme-label i,
+    .add-link-label i {
+      color: var(--primary-color);
+      font-size: 1rem;
+    }
+
+    .theme-dropdown {
+      position: relative;
+      min-width: 180px;
+    }
+
+    .theme-current {
+      width: 100%;
+      height: 3.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      background: var(--surface-color);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .theme-current:hover {
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .theme-dropdown.open .theme-current {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .theme-preview {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-color {
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    .theme-current i {
+      color: var(--text-secondary);
+      transition: transform 0.3s ease;
+      font-size: 0.75rem;
+    }
+
+    .theme-current i.rotated {
+      transform: rotate(180deg);
+    }
+
+    .theme-options {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      left: 0;
+      right: 0;
+      background: var(--surface-color);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      max-height: 320px;
+      overflow-y: auto;
+      animation: dropdownSlide 0.3s ease;
+    }
+
+    @keyframes dropdownSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .theme-option {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem 1rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .theme-option:last-child {
+      border-bottom: none;
+    }
+
+    .theme-option:hover {
+      background: var(--background-color);
+      transform: translateX(4px);
+    }
+
+    .theme-option.active {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+    }
+
+    .theme-option.active .theme-option-name {
+      color: white;
+      font-weight: 600;
+    }
+
+    .theme-colors {
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .color-primary,
+    .color-secondary {
+      width: 1rem;
+      height: 1rem;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-option-name {
+      flex: 1;
+      text-align: left;
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    .theme-option i {
+      color: white;
+      font-size: 0.875rem;
+    }
+
+    .add-link-btn {
+      width: 100%;
+      min-width: 3.5rem;
+      height: 3.5rem;
+      padding: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .add-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .add-link-btn i {
+      font-size: 1.25rem;
     }
 
     .dashboard-main {
@@ -245,15 +478,60 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       margin-bottom: 1rem;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 968px) {
       .header-content {
-        flex-direction: column;
-        gap: 1rem;
+        gap: 2rem;
+        padding: 0 1rem;
+      }
+
+      .dashboard-title {
+        font-size: 2rem;
       }
 
       .header-actions {
-        width: 100%;
-        justify-content: space-between;
+        gap: 1.5rem;
+      }
+
+      .theme-dropdown {
+        min-width: 160px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 1.5rem 0;
+      }
+
+      .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: stretch;
+      }
+
+      .dashboard-title {
+        font-size: 1.75rem;
+        justify-content: center;
+        text-align: center;
+      }
+
+      .actions-grid {
+        grid-template-columns: 1fr auto;
+        gap: 1.5rem;
+        min-width: auto;
+      }
+
+      .theme-dropdown {
+        min-width: 160px;
+      }
+
+      .add-link-btn {
+        min-width: 3rem;
+        height: 3rem;
+        font-size: 1rem;
+      }
+
+      .add-link-btn i {
+        font-size: 1rem;
       }
 
       .search-box {
@@ -266,18 +544,64 @@ import { LinkCardComponent } from '../link-card/link-card.component';
         gap: 0.75rem;
       }
     }
+
+    @media (max-width: 480px) {
+      .actions-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        justify-items: stretch;
+      }
+
+      .add-link-section {
+        justify-self: center;
+      }
+
+      .add-link-btn {
+        width: 3rem;
+        height: 3rem;
+        margin: 0 auto;
+      }
+
+      .theme-dropdown {
+        min-width: auto;
+      }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {
   showWizard = false;
   editingLink: QuickLink | null = null;
   currentTheme: Theme = 'light';
+  themeDropdownOpen = false;
   searchQuery = '';
   selectedTags: string[] = [];
   
   links: QuickLink[] = [];
   filteredLinks: QuickLink[] = [];
   availableTags: string[] = [];
+
+  themes = [
+    { value: 'light' as Theme, name: 'Light', primary: '#667eea', secondary: '#764ba2' },
+    { value: 'dark' as Theme, name: 'Dark', primary: '#6366f1', secondary: '#8b5cf6' },
+    { value: 'ocean' as Theme, name: 'Ocean', primary: '#0ea5e9', secondary: '#06b6d4' },
+    { value: 'forest' as Theme, name: 'Forest', primary: '#059669', secondary: '#10b981' },
+    { value: 'sunset' as Theme, name: 'Sunset', primary: '#f59e0b', secondary: '#f97316' },
+    { value: 'rose' as Theme, name: 'Rose', primary: '#e11d48', secondary: '#f43f5e' },
+    { value: 'purple' as Theme, name: 'Purple', primary: '#8b5cf6', secondary: '#a855f7' },
+    { value: 'emerald' as Theme, name: 'Emerald', primary: '#10b981', secondary: '#34d399' },
+    { value: 'slate' as Theme, name: 'Slate', primary: '#64748b', secondary: '#94a3b8' },
+    { value: 'cyber' as Theme, name: 'Cyber', primary: '#00d9ff', secondary: '#1de9b6' },
+    { value: 'warm' as Theme, name: 'Warm', primary: '#dc2626', secondary: '#ea580c' }
+  ];
+
+  getCurrentThemeColors() {
+    const style = getComputedStyle(document.documentElement);
+    return {
+      primary: style.getPropertyValue('--primary-color').trim(),
+      secondary: style.getPropertyValue('--secondary-color').trim()
+    };
+  }
+
 
   constructor(private themeService: ThemeService) {}
 
@@ -291,9 +615,35 @@ export class DashboardComponent implements OnInit {
     this.updateFilteredLinks();
   }
 
-  onThemeChange(event: Event) {
-    const theme = (event.target as HTMLSelectElement).value as Theme;
+  toggleThemeDropdown() {
+    this.themeDropdownOpen = !this.themeDropdownOpen;
+  }
+
+  selectTheme(theme: Theme) {
     this.themeService.setTheme(theme);
+    this.themeDropdownOpen = false;
+  }
+
+  getThemeColor(theme: Theme): string {
+    if (theme === this.currentTheme) {
+      return this.getCurrentThemeColors().primary;
+    }
+    const themeData = this.themes.find(t => t.value === theme);
+    return themeData ? themeData.primary : '#667eea';
+  }
+
+  getThemeName(theme: Theme): string {
+    const themeData = this.themes.find(t => t.value === theme);
+    return themeData ? themeData.name : 'Light';
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const dropdown = target.closest('.theme-dropdown');
+    if (!dropdown && this.themeDropdownOpen) {
+      this.themeDropdownOpen = false;
+    }
   }
 
   onSearchChange() {
