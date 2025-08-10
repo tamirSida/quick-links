@@ -32,7 +32,10 @@ import { LinkCardComponent } from '../link-card/link-card.component';
                       class="theme-current"
                       (click)="toggleThemeDropdown()">
                       <div class="theme-preview">
-                        <div class="theme-color" [style.background]="getCurrentThemeColors().primary"></div>
+                        <div class="theme-preview-colors">
+                          <div class="theme-color primary" [style.background]="getCurrentThemeColors().primary"></div>
+                          <div class="theme-color background" [style.background]="getCurrentBackgroundColor()"></div>
+                        </div>
                         <span class="theme-name">{{ getThemeName(currentTheme) }}</span>
                       </div>
                       <i class="fas fa-chevron-down" [class.rotated]="themeDropdownOpen"></i>
@@ -46,6 +49,7 @@ import { LinkCardComponent } from '../link-card/link-card.component';
                         <div class="theme-colors">
                           <div class="color-primary" [style.background]="theme.primary"></div>
                           <div class="color-secondary" [style.background]="theme.secondary"></div>
+                          <div class="color-background" [style.background]="theme.background"></div>
                         </div>
                         <span class="theme-option-name">{{ theme.name }}</span>
                         <i class="fas fa-check" *ngIf="theme.value === currentTheme"></i>
@@ -255,12 +259,21 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       gap: 0.75rem;
     }
 
+    .theme-preview-colors {
+      display: flex;
+      gap: 0.25rem;
+    }
+
     .theme-color {
       width: 1.25rem;
       height: 1.25rem;
       border-radius: 50%;
       border: 2px solid rgba(255, 255, 255, 0.3);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .theme-color.background {
+      border: 2px solid var(--border-color);
     }
 
     .theme-name {
@@ -343,12 +356,17 @@ import { LinkCardComponent } from '../link-card/link-card.component';
     }
 
     .color-primary,
-    .color-secondary {
+    .color-secondary,
+    .color-background {
       width: 1rem;
       height: 1rem;
       border-radius: 50%;
       border: 2px solid rgba(255, 255, 255, 0.3);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .color-background {
+      border: 2px solid rgba(0, 0, 0, 0.2);
     }
 
     .theme-option-name {
@@ -581,17 +599,17 @@ export class DashboardComponent implements OnInit {
   availableTags: string[] = [];
 
   themes = [
-    { value: 'light' as Theme, name: 'Light', primary: '#667eea', secondary: '#764ba2' },
-    { value: 'dark' as Theme, name: 'Dark', primary: '#6366f1', secondary: '#8b5cf6' },
-    { value: 'ocean' as Theme, name: 'Ocean', primary: '#0ea5e9', secondary: '#06b6d4' },
-    { value: 'forest' as Theme, name: 'Forest', primary: '#059669', secondary: '#10b981' },
-    { value: 'sunset' as Theme, name: 'Sunset', primary: '#f59e0b', secondary: '#f97316' },
-    { value: 'rose' as Theme, name: 'Rose', primary: '#e11d48', secondary: '#f43f5e' },
-    { value: 'purple' as Theme, name: 'Purple', primary: '#8b5cf6', secondary: '#a855f7' },
-    { value: 'emerald' as Theme, name: 'Emerald', primary: '#10b981', secondary: '#34d399' },
-    { value: 'slate' as Theme, name: 'Slate', primary: '#64748b', secondary: '#94a3b8' },
-    { value: 'cyber' as Theme, name: 'Cyber', primary: '#00d9ff', secondary: '#1de9b6' },
-    { value: 'warm' as Theme, name: 'Warm', primary: '#dc2626', secondary: '#ea580c' }
+    { value: 'light' as Theme, name: 'Light', primary: '#667eea', secondary: '#764ba2', background: '#f8fafc' },
+    { value: 'dark' as Theme, name: 'Dark', primary: '#6366f1', secondary: '#8b5cf6', background: '#0f172a' },
+    { value: 'ocean' as Theme, name: 'Ocean', primary: '#0ea5e9', secondary: '#06b6d4', background: '#f0f9ff' },
+    { value: 'forest' as Theme, name: 'Forest', primary: '#059669', secondary: '#10b981', background: '#f0fdf4' },
+    { value: 'sunset' as Theme, name: 'Sunset', primary: '#f59e0b', secondary: '#f97316', background: '#fffbeb' },
+    { value: 'rose' as Theme, name: 'Rose', primary: '#e11d48', secondary: '#f43f5e', background: '#fff1f2' },
+    { value: 'purple' as Theme, name: 'Purple', primary: '#8b5cf6', secondary: '#a855f7', background: '#faf5ff' },
+    { value: 'emerald' as Theme, name: 'Emerald', primary: '#10b981', secondary: '#34d399', background: '#ecfdf5' },
+    { value: 'slate' as Theme, name: 'Slate', primary: '#64748b', secondary: '#94a3b8', background: '#f8fafc' },
+    { value: 'cyber' as Theme, name: 'Cyber', primary: '#00d9ff', secondary: '#1de9b6', background: '#0a0a0a' },
+    { value: 'warm' as Theme, name: 'Warm', primary: '#dc2626', secondary: '#ea580c', background: '#fefaf8' }
   ];
 
   getCurrentThemeColors() {
@@ -600,6 +618,11 @@ export class DashboardComponent implements OnInit {
       primary: style.getPropertyValue('--primary-color').trim(),
       secondary: style.getPropertyValue('--secondary-color').trim()
     };
+  }
+
+  getCurrentBackgroundColor(): string {
+    const style = getComputedStyle(document.documentElement);
+    return style.getPropertyValue('--background-color').trim();
   }
 
 
