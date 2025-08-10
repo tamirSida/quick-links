@@ -1,0 +1,280 @@
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { QuickLink } from '../../models/link.model';
+
+@Component({
+  selector: 'app-link-card',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
+    <div class="link-card" (click)="openLink()">
+      <div class="card-header">
+        <div class="icon-container">
+          <i [class]="link.icon"></i>
+        </div>
+        <div class="card-actions">
+          <button 
+            class="action-btn"
+            (click)="onEdit($event)"
+            title="Edit link">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button 
+            class="action-btn delete-btn"
+            (click)="onDelete($event)"
+            title="Delete link">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="card-content">
+        <h3 class="card-title">{{ link.title }}</h3>
+        <p class="card-description" *ngIf="link.description">
+          {{ link.description }}
+        </p>
+        <div class="card-url">
+          <i class="fas fa-external-link-alt"></i>
+          {{ getDisplayUrl() }}
+        </div>
+      </div>
+
+      <div class="card-footer" *ngIf="link.tags.length > 0">
+        <div class="tags">
+          <span 
+            *ngFor="let tag of link.tags.slice(0, 3)"
+            class="tag">
+            {{ tag }}
+          </span>
+          <span 
+            *ngIf="link.tags.length > 3"
+            class="tag-more">
+            +{{ link.tags.length - 3 }} more
+          </span>
+        </div>
+      </div>
+
+      <div class="card-hover-overlay">
+        <i class="fas fa-external-link-alt"></i>
+        <span>Open Link</span>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .link-card {
+      position: relative;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .link-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-color);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .icon-container {
+      width: 3rem;
+      height: 3rem;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-container i {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.25rem;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .link-card:hover .card-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      width: 2rem;
+      height: 2rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      background-color: var(--background-color);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .delete-btn:hover {
+      background-color: #ef4444;
+    }
+
+    .card-content {
+      flex: 1;
+    }
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .card-description {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-url {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .card-url i {
+      opacity: 0.7;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+    }
+
+    .tag {
+      padding: 0.25rem 0.5rem;
+      background-color: var(--background-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 0.625rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .tag-more {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.625rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .card-hover-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .card-hover-overlay i {
+      font-size: 2rem;
+    }
+
+    .link-card:hover .card-hover-overlay {
+      opacity: 0.95;
+    }
+
+    @media (max-width: 640px) {
+      .link-card {
+        min-height: 160px;
+        padding: 1rem;
+      }
+
+      .icon-container {
+        width: 2.5rem;
+        height: 2.5rem;
+      }
+
+      .icon-container i {
+        font-size: 1.25rem;
+      }
+
+      .card-title {
+        font-size: 1rem;
+      }
+    }
+  `]
+})
+export class LinkCardComponent {
+  @Input() link!: QuickLink;
+  @Output() edit = new EventEmitter<QuickLink>();
+  @Output() delete = new EventEmitter<string>();
+
+  openLink() {
+    window.open(this.link.url, '_blank', 'noopener,noreferrer');
+  }
+
+  onEdit(event: Event) {
+    event.stopPropagation();
+    this.edit.emit(this.link);
+  }
+
+  onDelete(event: Event) {
+    event.stopPropagation();
+    this.delete.emit(this.link.id);
+  }
+
+  getDisplayUrl(): string {
+    try {
+      const url = new URL(this.link.url);
+      return url.hostname;
+    } catch {
+      return this.link.url;
+    }
+  }
+}
