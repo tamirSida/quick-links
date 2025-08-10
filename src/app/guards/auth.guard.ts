@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { map } from 'rxjs/operators';
+import { map, filter, take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -15,12 +15,11 @@ export class AuthGuard implements CanActivate {
 
   canActivate(): Observable<boolean> {
     return this.authService.currentUser$.pipe(
+      filter(user => user !== undefined),
+      take(1),
       map(user => {
-        if (user && user.approved === true) {
-          return true;
-        } else if (user && user.approved === false) {
-          this.router.navigate(['/pending-approval']);
-          return false;
+        if (user) {
+          return true; // If user exists, allow access
         } else {
           this.router.navigate(['/']);
           return false;

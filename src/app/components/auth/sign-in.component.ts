@@ -404,13 +404,8 @@ export class SignInComponent {
         await this.authService.createUserWithEmailAndPassword(this.email, this.password);
       }
       
-      // Check if user is approved
-      const user = this.authService.getCurrentUser();
-      if (user?.approved === true) {
-        this.router.navigate(['/dashboard']);
-      } else {
-        this.router.navigate(['/pending-approval']);
-      }
+      // Go directly to dashboard
+      this.router.navigate(['/dashboard']);
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error);
     } finally {

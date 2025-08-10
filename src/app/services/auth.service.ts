@@ -24,55 +24,58 @@ export interface User {
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  private currentUserSubject = new BehaviorSubject<User | null | undefined>(undefined);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
+    console.log('🚀 AuthService constructor called');
+    // Initialize persistence and auth state listener
+    this.initializeAuth();
+  }
+
+  private async initializeAuth() {
+    try {
+      // Set default persistence to local for all users
+      await setPersistence(auth, browserLocalPersistence);
+      console.log('✅ Firebase persistence set to LOCAL');
+    } catch (error) {
+      console.log('❌ Persistence setup failed:', error);
+    }
+    
     // Listen to Firebase Auth state changes
     onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('🔄 Auth state changed:', firebaseUser ? `User: ${firebaseUser.email}` : 'No user');
+      
       if (firebaseUser) {
-        // Check approval status from Firestore instead of custom claims
-        let approved = false;
-        try {
-          const userDoc = await getDoc(doc(firestore, 'users', firebaseUser.uid));
-          if (userDoc.exists()) {
-            approved = userDoc.data()['approved'] === true;
-          } else {
-            // For admin user, auto-approve
-            approved = firebaseUser.uid === 'KhrB5Bdod3fUb1DhjmNdtJBmU4i1';
-          }
-        } catch (error) {
-          console.error('Error checking approval status:', error);
-          // For admin user, auto-approve even if Firestore fails
-          approved = firebaseUser.uid === 'KhrB5Bdod3fUb1DhjmNdtJBmU4i1';
-        }
-        
         const user: User = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || undefined,
-          approved: approved
+          approved: true // Everyone is approved now
         };
+        
+        console.log('👤 Setting user:', { email: user.email });
         this.currentUserSubject.next(user);
       } else {
+        console.log('❌ No user found - setting to null');
         this.currentUserSubject.next(null);
       }
     });
   }
 
-  async signInWithEmailAndPassword(email: string, password: string, rememberMe: boolean = false): Promise<User> {
+  async signInWithEmailAndPassword(email: string, password: string, rememberMe: boolean = true): Promise<User> {
     try {
-      // Set persistence based on remember me option
-      const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
-      await setPersistence(auth, persistence);
+      // Ensure persistence is set before signing in
+      await setPersistence(auth, browserLocalPersistence);
       
       const credential = await signInWithEmailAndPassword(auth, email, password);
-      const user: User = {
+      // Auth state change listener will handle setting the user
+      return {
         uid: credential.user.uid,
         email: credential.user.email || '',
-        displayName: credential.user.displayName || undefined
+        displayName: credential.user.displayName || undefined,
+        approved: false // Will be set by the auth state listener
       };
-      return user;
     } catch (error: any) {
       throw error;
     }
@@ -109,7 +112,7 @@ export class AuthService {
   }
 
   getCurrentUser(): User | null {
-    return this.currentUserSubject.value;
+    return this.currentUserSubject.value || null;
   }
 
   isLoggedIn(): boolean {
@@ -118,6 +121,6 @@ export class AuthService {
 
   isApproved(): boolean {
     const user = this.currentUserSubject.value;
-    return user !== null && user.approved === true;
+    return user !== null && user !== undefined && user.approved === true;
   }
 }
