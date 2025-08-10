@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated users to read and write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read and write links
+    match /links/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read and write categories
+    match /categories/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to read and write any other collections
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
