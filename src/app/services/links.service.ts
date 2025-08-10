@@ -4,7 +4,6 @@ import {
   collection,
   query,
   where,
-  orderBy,
   addDoc,
   updateDoc,
   deleteDoc,
@@ -127,8 +126,7 @@ export class LinksService {
 
     const userLinksQuery = query(
       this.linksCollection,
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     );
 
     this.unsubscribe = onSnapshot(userLinksQuery, (snapshot) => {

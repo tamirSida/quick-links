@@ -5,6 +5,9 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  setPersistence,
+  browserSessionPersistence,
+  browserLocalPersistence,
   User as FirebaseUser
 } from 'firebase/auth';
 import { auth } from './firebase';
@@ -38,8 +41,12 @@ export class AuthService {
     });
   }
 
-  async signInWithEmailAndPassword(email: string, password: string): Promise<User> {
+  async signInWithEmailAndPassword(email: string, password: string, rememberMe: boolean = false): Promise<User> {
     try {
+      // Set persistence based on remember me option
+      const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistence);
+      
       const credential = await signInWithEmailAndPassword(auth, email, password);
       const user: User = {
         uid: credential.user.uid,

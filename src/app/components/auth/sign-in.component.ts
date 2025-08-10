@@ -73,6 +73,18 @@ import { ThemeService } from '../../services/theme.service';
             </div>
           </div>
 
+          <div class="form-group remember-me" *ngIf="isSignIn">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                class="checkbox-input"
+                [(ngModel)]="rememberMe"
+                name="rememberMe">
+              <span class="checkbox-custom"></span>
+              Remember me
+            </label>
+          </div>
+
           <div class="form-actions">
             <button 
               type="submit" 
@@ -90,18 +102,6 @@ import { ThemeService } from '../../services/theme.service';
             {{ errorMessage }}
           </div>
         </form>
-
-        <div class="demo-section">
-          <div class="divider">
-            <span>or</span>
-          </div>
-          <button 
-            class="btn btn-secondary demo-btn"
-            (click)="goToDemo()">
-            <i class="fas fa-eye"></i>
-            Try Demo (No Account Needed)
-          </button>
-        </div>
 
         <div class="footer-links">
           <p class="text-sm">
@@ -248,6 +248,57 @@ import { ThemeService } from '../../services/theme.service';
       cursor: not-allowed;
     }
 
+    .remember-me {
+      margin-bottom: 1rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .checkbox-input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .checkbox-custom {
+      width: 1.25rem;
+      height: 1.25rem;
+      background: var(--surface-color);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      position: relative;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .checkbox-input:checked + .checkbox-custom {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .checkbox-input:checked + .checkbox-custom::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .checkbox-custom:hover {
+      border-color: var(--primary-color);
+    }
+
     .error-message {
       color: #ef4444;
       font-size: 0.75rem;
@@ -330,6 +381,7 @@ export class SignInComponent {
   isSignIn = true;
   email = '';
   password = '';
+  rememberMe = false;
   loading = false;
   errorMessage = '';
 
@@ -347,7 +399,7 @@ export class SignInComponent {
 
     try {
       if (this.isSignIn) {
-        await this.authService.signInWithEmailAndPassword(this.email, this.password);
+        await this.authService.signInWithEmailAndPassword(this.email, this.password, this.rememberMe);
       } else {
         await this.authService.createUserWithEmailAndPassword(this.email, this.password);
       }
@@ -359,9 +411,6 @@ export class SignInComponent {
     }
   }
 
-  goToDemo() {
-    this.router.navigate(['/demo']);
-  }
 
   private getErrorMessage(error: any): string {
     switch (error.code) {
