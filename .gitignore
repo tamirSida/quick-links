@@ -57,3 +57,6 @@ firebaserc
 
 # Firebase config (contains API keys)
 src/app/services/firebase.config.ts
+
+# Claude Code session notes
+CLAUDE.md
