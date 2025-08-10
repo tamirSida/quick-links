@@ -31,11 +31,13 @@ service cloud.firestore {
 
 ## Application Features Completed
 
-### ✅ Authentication Flow
+### ✅ Authentication Flow with Approval System
 - Sign-in/Sign-up page at `/`
+- Pending approval page at `/pending-approval` (for unapproved users)
 - Demo page at `/demo` (no auth required)  
-- Protected dashboard at `/dashboard` (auth required)
+- Protected dashboard at `/dashboard` (approved users only)
 - Sign-out functionality
+- "Remember me" option for persistent login
 
 ### ✅ Firebase Integration
 - Real-time Firestore database for storing links
@@ -57,6 +59,30 @@ service cloud.firestore {
 - Mobile-first responsive layout
 - Touch-friendly interface
 - Grid-based link display
+
+## 🔐 User Approval System + Admin Dashboard
+
+### Admin Dashboard Access:
+**Your Admin User ID:** `KhrB5Bdod3fUb1DhjmNdtJBmU4i1`
+- Visit `/admin` to access the admin dashboard
+- Create users, approve/disapprove, view all registrations
+
+### Admin Dashboard Features:
+- **Create Users**: Auto-approved users with email/password
+- **Approve/Disapprove**: Toggle user access with one click
+- **User Statistics**: View approved vs pending counts
+- **User Management**: Full CRUD operations
+
+### How It Works:
+1. **User signs up** → Account created but `approved: false` (no dashboard access)
+2. **User tries dashboard** → Redirected to "Pending Approval" page  
+3. **You approve via admin dashboard** → User gets instant access
+4. **User can access dashboard** → Full functionality available
+
+### User Experience:
+- **New users**: See "Account Pending Approval" message
+- **Approved users**: Full access to dashboard
+- **Unapproved users**: Can still access demo at `/demo`
 
 ## How to Run
 

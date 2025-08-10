@@ -10,12 +10,14 @@ import {
   browserLocalPersistence,
   User as FirebaseUser
 } from 'firebase/auth';
-import { auth } from './firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, firestore } from './firebase';
 
 export interface User {
   uid: string;
   email: string;
   displayName?: string;
+  approved?: boolean;
 }
 
 @Injectable({
@@ -27,12 +29,29 @@ export class AuthService {
 
   constructor() {
     // Listen to Firebase Auth state changes
-    onAuthStateChanged(auth, (firebaseUser) => {
+    onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Check approval status from Firestore instead of custom claims
+        let approved = false;
+        try {
+          const userDoc = await getDoc(doc(firestore, 'users', firebaseUser.uid));
+          if (userDoc.exists()) {
+            approved = userDoc.data()['approved'] === true;
+          } else {
+            // For admin user, auto-approve
+            approved = firebaseUser.uid === 'KhrB5Bdod3fUb1DhjmNdtJBmU4i1';
+          }
+        } catch (error) {
+          console.error('Error checking approval status:', error);
+          // For admin user, auto-approve even if Firestore fails
+          approved = firebaseUser.uid === 'KhrB5Bdod3fUb1DhjmNdtJBmU4i1';
+        }
+        
         const user: User = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
-          displayName: firebaseUser.displayName || undefined
+          displayName: firebaseUser.displayName || undefined,
+          approved: approved
         };
         this.currentUserSubject.next(user);
       } else {
@@ -62,10 +81,18 @@ export class AuthService {
   async createUserWithEmailAndPassword(email: string, password: string): Promise<User> {
     try {
       const credential = await createUserWithEmailAndPassword(auth, email, password);
+      
+      // Track user registration for admin dashboard
+      // We'll import AdminService dynamically to avoid circular dependency
+      const { AdminService } = await import('./admin.service');
+      const adminService = new AdminService();
+      await adminService.trackUserRegistration(credential.user);
+      
       const user: User = {
         uid: credential.user.uid,
         email: credential.user.email || '',
-        displayName: credential.user.displayName || undefined
+        displayName: credential.user.displayName || undefined,
+        approved: false // New users start unapproved
       };
       return user;
     } catch (error: any) {
@@ -87,5 +114,10 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     return this.currentUserSubject.value !== null;
+  }
+
+  isApproved(): boolean {
+    const user = this.currentUserSubject.value;
+    return user !== null && user.approved === true;
   }
 }

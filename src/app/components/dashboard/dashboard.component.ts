@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { LinksService } from '../../services/links.service';
 import { AuthService } from '../../services/auth.service';
+import { AdminService } from '../../services/admin.service';
 import { QuickLink } from '../../models/link.model';
 import { LinkWizardComponent } from '../link-wizard/link-wizard.component';
 import { LinkCardComponent } from '../link-card/link-card.component';
@@ -24,7 +25,7 @@ import { LinkCardComponent } from '../link-card/link-card.component';
             </h1>
             
             <div class="header-actions">
-              <div class="actions-grid">
+              <div class="actions-grid" [class.admin]="isAdmin()">
                 <div class="theme-selector">
                   <label class="theme-label">
                     <i class="fas fa-palette"></i>
@@ -71,6 +72,19 @@ import { LinkCardComponent } from '../link-card/link-card.component';
                     (click)="showWizard = true"
                     title="Add Link">
                     <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+
+                <div class="admin-section" *ngIf="isAdmin()">
+                  <label class="add-link-label">
+                    <i class="fas fa-user-shield"></i>
+                    Admin
+                  </label>
+                  <button 
+                    class="btn btn-warning admin-btn"
+                    (click)="goToAdmin()"
+                    title="Admin Dashboard">
+                    <i class="fas fa-cog"></i>
                   </button>
                 </div>
 
@@ -214,8 +228,14 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       min-width: 350px;
     }
 
+    .actions-grid.admin {
+      grid-template-columns: 1fr auto auto auto;
+      min-width: 450px;
+    }
+
     .theme-selector,
     .add-link-section,
+    .admin-section,
     .sign-out-section {
       position: relative;
     }
@@ -447,6 +467,32 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       font-size: 1.25rem;
     }
 
+    .admin-btn {
+      width: 100%;
+      min-width: 3.5rem;
+      height: 3.5rem;
+      padding: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      background: #f59e0b;
+      color: white;
+    }
+
+    .admin-btn:hover {
+      background: #d97706;
+      transform: translateY(-2px);
+    }
+
+    .admin-btn i {
+      font-size: 1.25rem;
+    }
+
     .dashboard-main {
       padding: 2rem 0;
     }
@@ -670,6 +716,7 @@ export class DashboardComponent implements OnInit {
     private themeService: ThemeService,
     private linksService: LinksService,
     private authService: AuthService,
+    private adminService: AdminService,
     private router: Router
   ) {}
 
@@ -799,6 +846,14 @@ export class DashboardComponent implements OnInit {
     } catch (error) {
       console.error('Error signing out:', error);
     }
+  }
+
+  isAdmin(): boolean {
+    return this.adminService.isAdmin();
+  }
+
+  goToAdmin() {
+    this.router.navigate(['/admin']);
   }
 
 
