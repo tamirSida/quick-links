@@ -32,8 +32,9 @@ import { ThemeService } from '../../services/theme.service';
         <!-- Hidden HTML form for Netlify detection -->
         <form 
           name="access-requests" 
-          netlify 
-          hidden>
+          method="POST" 
+          data-netlify="true"
+          style="display: none;">
           <input type="text" name="name" />
           <input type="email" name="email" />
           <select name="referral_source">
