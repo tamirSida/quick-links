@@ -29,16 +29,34 @@ import { ThemeService } from '../../services/theme.service';
           </button>
         </div>
 
+        <!-- Hidden HTML form for Netlify detection -->
+        <form 
+          name="access-requests" 
+          netlify 
+          hidden>
+          <input type="text" name="name" />
+          <input type="email" name="email" />
+          <select name="referral_source">
+            <option value="friend">Friend or colleague</option>
+            <option value="social-media">Social media</option>
+            <option value="search-engine">Search engine</option>
+            <option value="github">GitHub</option>
+            <option value="dev-community">Developer community/forum</option>
+            <option value="blog">Blog or article</option>
+            <option value="other">Other</option>
+          </select>
+          <textarea name="comments"></textarea>
+        </form>
+
+        <!-- JavaScript-rendered form -->
         <form 
           *ngIf="!submitted"
-          name="access-requests" 
-          method="POST" 
-          data-netlify="true"
+          name="access-requests"
           class="request-form"
-          (ngSubmit)="onSubmit()"
+          (ngSubmit)="onSubmit($event)"
           #requestForm="ngForm">
           
-          <!-- Netlify form detection -->
+          <!-- Hidden form-name input for Netlify -->
           <input type="hidden" name="form-name" value="access-requests" />
           
           <div class="form-group">
@@ -376,19 +394,33 @@ export class RequestAccessComponent {
     private themeService: ThemeService
   ) {}
 
-  async onSubmit() {
+  async onSubmit(event: Event) {
     if (this.loading) return;
     
+    event.preventDefault();
     this.loading = true;
 
     try {
-      // The form will be submitted to Netlify automatically
-      // We just need to show the success message
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate submission delay
+      // Prepare form data for Netlify submission
+      const formData = new FormData();
+      formData.append('form-name', 'access-requests');
+      formData.append('name', this.formData.name);
+      formData.append('email', this.formData.email);
+      formData.append('referral_source', this.formData.referralSource);
+      formData.append('comments', this.formData.comments);
+
+      // Submit to Netlify
+      await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as any).toString()
+      });
+
       this.submitted = true;
     } catch (error) {
       console.error('Error submitting form:', error);
       // In a real scenario, you might want to show an error message
+      alert('There was an error submitting your request. Please try again.');
     } finally {
       this.loading = false;
     }
