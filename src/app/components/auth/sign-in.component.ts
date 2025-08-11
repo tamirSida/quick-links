@@ -336,11 +336,13 @@ import { ThemeService } from '../../services/theme.service';
 
     .divider span {
       background: var(--surface-color);
-      padding: 0 1rem;
+      padding: 0 1.5rem;
       color: var(--text-secondary);
       font-size: 0.75rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      position: relative;
+      z-index: 1;
     }
 
     .request-access-section {

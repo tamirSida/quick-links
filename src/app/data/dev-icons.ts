@@ -231,7 +231,8 @@ export const DEV_ICONS = [
   { value: 'fas fa-home', label: 'Home', category: 'Utility' },
   { value: 'fas fa-user', label: 'Profile', category: 'Utility' },
   { value: 'fas fa-phone', label: 'Phone', category: 'Utility' },
-  { value: 'fas fa-envelope', label: 'Email', category: 'Utility' }
+  { value: 'fas fa-envelope', label: 'Email', category: 'Utility' },
+  { value: 'fas fa-fire-alt', label: 'Hot/Trending', category: 'Utility' }
 ];
 
 export const ICON_CATEGORIES = [
