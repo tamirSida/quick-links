@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { LinksService } from '../../services/links.service';
 import { ViewsService } from '../../services/views.service';
@@ -1069,7 +1069,8 @@ export class DashboardComponent implements OnInit {
     private viewsService: ViewsService,
     private authService: AuthService,
     private adminService: AdminService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -1091,6 +1092,8 @@ export class DashboardComponent implements OnInit {
     // Subscribe to views from the service
     this.viewsService.getUserViews().subscribe(views => {
       this.views = views;
+      // After views are loaded, check for URL parameter
+      this.handleViewFromUrl();
     });
     
     // Subscribe to current view
@@ -1266,6 +1269,8 @@ export class DashboardComponent implements OnInit {
 
   selectView(view: View) {
     this.viewsService.setCurrentView(view);
+    // Update URL with view parameter
+    this.updateUrlWithView(view);
   }
 
   getViewLinkCount(viewId: string): number {
@@ -1367,5 +1372,42 @@ Look for orange badges on cluster links!`;
       link.tags.forEach(tag => tagSet.add(tag));
     });
     this.availableTags = Array.from(tagSet).sort();
+  }
+
+  private handleViewFromUrl() {
+    // Check for view parameter in URL
+    this.route.queryParams.subscribe(params => {
+      const viewParam = params['view'];
+      if (viewParam && this.views.length > 0) {
+        // Try to find view by name (URL-friendly)
+        const targetView = this.views.find(view => 
+          this.getUrlFriendlyViewName(view) === viewParam
+        );
+        if (targetView) {
+          this.viewsService.setCurrentView(targetView);
+        }
+      }
+    });
+  }
+
+  private updateUrlWithView(view: View) {
+    // Update URL without triggering navigation
+    const urlFriendlyName = this.getUrlFriendlyViewName(view);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: view.isDefault ? {} : { view: urlFriendlyName },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  private getUrlFriendlyViewName(view: View): string {
+    // Convert view name to URL-friendly format
+    if (view.isDefault) {
+      return 'all';
+    }
+    return view.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with dashes
+      .replace(/^-+|-+$/g, '');     // Remove leading/trailing dashes
   }
 }
