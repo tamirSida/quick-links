@@ -50,7 +50,8 @@ export class LinksService {
     if (!user) throw new Error('User not authenticated');
 
     try {
-      // Initialize with view ID if provided
+      // If viewId is provided, add only to that view
+      // If no viewId, the link will be "orphaned" and only show in "All Links"
       const initialViewIds = viewId ? [viewId] : [];
 
       const linkToAdd = {

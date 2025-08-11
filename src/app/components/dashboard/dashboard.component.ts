@@ -207,8 +207,11 @@ import { ViewWizardComponent } from '../view-wizard/view-wizard.component';
                 [link]="link"
                 [editMode]="editMode"
                 [index]="i"
+                [currentViewId]="currentView?.id || null"
+                [isDefaultView]="currentView?.isDefault || false"
                 (edit)="editLink($event)"
                 (delete)="deleteLink($event)"
+                (removeFromView)="removeLinkFromView($event)"
                 (reorder)="reorderLinks($event)">
               </app-link-card>
             </div>
@@ -1102,10 +1105,10 @@ export class DashboardComponent implements OnInit {
     // Filter by current view first
     if (this.currentView) {
       if (this.currentView.isDefault) {
-        // Default view shows all links
+        // Default "All Links" view shows all links
         filtered = this.links;
       } else {
-        // Custom view shows only links in that view
+        // Custom view shows only links that belong to this view
         filtered = this.links.filter(link => 
           link.viewIds && link.viewIds.includes(this.currentView!.id)
         );
@@ -1156,12 +1159,17 @@ export class DashboardComponent implements OnInit {
       if (this.editingLink) {
         await this.linksService.updateLink(this.editingLink.id, linkData);
       } else {
-        // Add to current view if it's not the default view
+        // Add to current view only (not to "All Links" if we're in a custom view)
         const viewId = this.currentView && !this.currentView.isDefault ? 
           this.currentView.id : undefined;
-        await this.linksService.addLink(linkData, viewId);
+        
+        const newLink = await this.linksService.addLink(linkData, viewId);
+        
+        // If we're in a custom view, make sure the link is associated properly
+        if (viewId && this.currentView) {
+          await this.viewsService.addLinkToView(viewId, newLink.id);
+        }
       }
-      // The service will automatically update the links observable
       this.onWizardCancel();
     } catch (error) {
       console.error('Error saving link:', error);
@@ -1215,9 +1223,12 @@ export class DashboardComponent implements OnInit {
   }
 
   getViewLinkCount(viewId: string): number {
-    if (this.views.find(v => v.id === viewId)?.isDefault) {
+    const view = this.views.find(v => v.id === viewId);
+    if (view?.isDefault) {
+      // "All Links" shows total count
       return this.links.length;
     }
+    // Custom views show only links belonging to that view
     return this.links.filter(link => link.viewIds && link.viewIds.includes(viewId)).length;
   }
 
@@ -1259,6 +1270,18 @@ export class DashboardComponent implements OnInit {
   onViewWizardCancel() {
     this.showViewWizard = false;
     this.editingView = null;
+  }
+
+  async removeLinkFromView(event: { linkId: string; viewId: string }) {
+    if (confirm('Remove this link from the current view? The link will still exist in other views.')) {
+      try {
+        await this.viewsService.removeLinkFromView(event.viewId, event.linkId);
+        await this.linksService.removeLinkFromView(event.linkId, event.viewId);
+      } catch (error) {
+        console.error('Error removing link from view:', error);
+        alert('Failed to remove link from view. Please try again.');
+      }
+    }
   }
 
   private updateAvailableTags() {

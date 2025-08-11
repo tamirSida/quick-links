@@ -25,10 +25,20 @@ import { QuickLink } from '../../models/link.model';
             title="Edit link">
             <i class="fas fa-edit"></i>
           </button>
+          
+          <!-- Show remove from view button only for non-default views -->
+          <button 
+            *ngIf="!isDefaultView && currentViewId"
+            class="action-btn remove-btn"
+            (click)="onRemoveFromView($event)"
+            title="Remove from this view">
+            <i class="fas fa-minus"></i>
+          </button>
+          
           <button 
             class="action-btn delete-btn"
             (click)="onDelete($event)"
-            title="Delete link">
+            [title]="isDefaultView ? 'Delete link permanently' : 'Delete link from all views'">
             <i class="fas fa-trash"></i>
           </button>
         </div>
@@ -147,6 +157,10 @@ import { QuickLink } from '../../models/link.model';
 
     .delete-btn:hover {
       background-color: #ef4444;
+    }
+
+    .remove-btn:hover {
+      background-color: #f97316;
     }
 
     .card-content {
@@ -291,8 +305,11 @@ export class LinkCardComponent {
   @Input() link!: QuickLink;
   @Input() editMode = false;
   @Input() index = 0;
+  @Input() currentViewId: string | null = null;
+  @Input() isDefaultView = false;
   @Output() edit = new EventEmitter<QuickLink>();
   @Output() delete = new EventEmitter<string>();
+  @Output() removeFromView = new EventEmitter<{ linkId: string; viewId: string }>();
   @Output() reorder = new EventEmitter<{ fromIndex: number; toIndex: number }>();
 
   openLink() {
@@ -307,6 +324,13 @@ export class LinkCardComponent {
   onDelete(event: Event) {
     event.stopPropagation();
     this.delete.emit(this.link.id);
+  }
+
+  onRemoveFromView(event: Event) {
+    event.stopPropagation();
+    if (this.currentViewId) {
+      this.removeFromView.emit({ linkId: this.link.id, viewId: this.currentViewId });
+    }
   }
 
   getDisplayUrl(): string {
