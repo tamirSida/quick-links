@@ -1337,12 +1337,16 @@ export class DashboardComponent implements OnInit {
   showClusterHelp() {
     const helpMessage = `Cluster links open multiple URLs at once in new tabs.
 
-To use clusters properly, allow popups for this site:
+To use clusters, allow popups for this site (ONE TIME SETUP):
 
-• Chrome: Click popup blocked icon in address bar → "Always allow"
-• Firefox: Click shield icon → "Disable Blocking"  
+• Chrome: Click popup blocked icon in address bar → "Always allow" 
+• Firefox: Click shield icon → "Disable Blocking for This Site"
 • Safari: Safari → Preferences → Websites → Pop-up Windows → Allow
 • Edge: Click popup blocked icon → "Always allow"
+
+⚠️ Make sure to choose "Always allow" or "Allow for this site" - not just "Allow once"!
+
+Once set up, clusters will work without asking again.
 
 Look for orange badges on cluster links!`;
     
