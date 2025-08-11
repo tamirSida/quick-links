@@ -251,6 +251,25 @@ import { ViewWizardComponent } from '../view-wizard/view-wizard.component';
               </button>
             </div>
           </div>
+
+          <div class="cluster-notice-banner" *ngIf="hasClusterLinks() && !clusterNoticedismissed">
+            <div class="banner-content">
+              <i class="fas fa-layer-group"></i>
+              <span>You have cluster links! For best experience, <strong>allow popups</strong> for this site to open multiple URLs at once.</span>
+              <button class="btn btn-sm btn-secondary" (click)="showClusterHelp()">
+                <i class="fas fa-question-circle"></i>
+                Help
+              </button>
+              <button class="btn btn-sm btn-secondary" (click)="dismissClusterNotice(false)">
+                <i class="fas fa-times"></i>
+                Dismiss
+              </button>
+              <button class="btn btn-sm btn-secondary" (click)="dismissClusterNotice(true)">
+                <i class="fas fa-eye-slash"></i>
+                Don't show again
+              </button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
@@ -725,6 +744,24 @@ import { ViewWizardComponent } from '../view-wizard/view-wizard.component';
       font-weight: 500;
     }
 
+    .cluster-notice-banner {
+      background: linear-gradient(135deg, #e0f2fe, #b3e5fc);
+      border: 1px solid #0288d1;
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(2, 136, 209, 0.15);
+    }
+
+    .cluster-notice-banner .banner-content {
+      color: #01579b;
+    }
+
+    .cluster-notice-banner i {
+      color: #0288d1;
+      font-size: 1rem;
+    }
+
     .view-tabs {
       display: flex;
       justify-content: space-between;
@@ -989,6 +1026,7 @@ export class DashboardComponent implements OnInit {
   editMode = false;
   showViewWizard = false;
   editingView: View | null = null;
+  clusterNoticedismissed = false;
   
   links: QuickLink[] = [];
   filteredLinks: QuickLink[] = [];
@@ -1039,6 +1077,9 @@ export class DashboardComponent implements OnInit {
     this.themeService.theme$.subscribe(theme => {
       this.currentTheme = theme;
     });
+    
+    // Check if cluster notice was permanently dismissed
+    this.clusterNoticedismissed = localStorage.getItem('clusterNoticeDissmissedPermanently') === 'true';
     
     // Subscribe to links from the service
     this.linksService.getUserLinks().subscribe(links => {
@@ -1286,6 +1327,33 @@ export class DashboardComponent implements OnInit {
         console.error('Error removing link from view:', error);
         alert('Failed to remove link from view. Please try again.');
       }
+    }
+  }
+
+  hasClusterLinks(): boolean {
+    return this.links.some(link => link.isCluster);
+  }
+
+  showClusterHelp() {
+    const helpMessage = `Cluster links open multiple URLs at once.
+
+To use clusters properly, please allow popups:
+
+• Chrome: Click popup blocked icon in address bar → "Always allow"
+• Firefox: Click shield icon → "Disable Blocking"  
+• Safari: Safari → Preferences → Websites → Pop-up Windows → Allow
+• Edge: Click popup blocked icon → "Always allow"
+
+Look for orange badges on cluster links!`;
+    
+    alert(helpMessage);
+  }
+
+  dismissClusterNotice(permanent: boolean) {
+    this.clusterNoticedismissed = true;
+    if (permanent) {
+      // Store permanent dismissal in localStorage
+      localStorage.setItem('clusterNoticeDissmissedPermanently', 'true');
     }
   }
 

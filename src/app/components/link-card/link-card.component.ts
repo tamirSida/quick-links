@@ -17,6 +17,10 @@ import { QuickLink } from '../../models/link.model';
       <div class="card-header">
         <div class="icon-container">
           <i [class]="link.icon"></i>
+          <div class="cluster-badge" *ngIf="link.isCluster" title="{{ link.clusterUrls.length }} URLs in cluster">
+            <i class="fas fa-layer-group"></i>
+            <span>{{ link.clusterUrls.length }}</span>
+          </div>
         </div>
         <div class="card-actions" [class.always-visible]="editMode">
           <button 
@@ -71,8 +75,8 @@ import { QuickLink } from '../../models/link.model';
       </div>
 
       <div class="card-hover-overlay" *ngIf="!editMode">
-        <i class="fas fa-external-link-alt"></i>
-        <span>Open Link</span>
+        <i [class]="link.isCluster ? 'fas fa-layer-group' : 'fas fa-external-link-alt'"></i>
+        <span>{{ link.isCluster ? 'Open Cluster' : 'Open Link' }}</span>
       </div>
       
       <div class="drag-indicator" *ngIf="editMode">
@@ -280,6 +284,33 @@ import { QuickLink } from '../../models/link.model';
       z-index: 10;
     }
 
+    .icon-container {
+      position: relative;
+    }
+
+    .cluster-badge {
+      position: absolute;
+      top: -0.35rem;
+      right: -0.35rem;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.625rem;
+      font-weight: 700;
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.4);
+      border: 2px solid white;
+      z-index: 10;
+    }
+
+    .cluster-badge i {
+      display: none;
+    }
+
     @media (max-width: 640px) {
       .link-card {
         min-height: 160px;
@@ -313,7 +344,32 @@ export class LinkCardComponent {
   @Output() reorder = new EventEmitter<{ fromIndex: number; toIndex: number }>();
 
   openLink() {
-    window.open(this.link.url, '_blank', 'noopener,noreferrer');
+    if (this.link.isCluster && this.link.clusterUrls.length > 0) {
+      this.openCluster();
+    } else {
+      window.open(this.link.url, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  private openCluster() {
+    if (this.link.clusterUrls.length === 0) return;
+    
+    if (this.link.openInSeparateWindows) {
+      // Open each URL in a completely separate browser window
+      this.link.clusterUrls.forEach((url, index) => {
+        setTimeout(() => {
+          // Use window.open with specific window features for separate windows
+          window.open(url, `cluster_window_${Date.now()}_${index}`, 'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,location=yes');
+        }, index * 100);
+      });
+    } else {
+      // Open each URL as a new tab (default browser behavior)
+      this.link.clusterUrls.forEach((url, index) => {
+        setTimeout(() => {
+          window.open(url, '_blank', 'noopener,noreferrer');
+        }, index * 50);
+      });
+    }
   }
 
   onEdit(event: Event) {

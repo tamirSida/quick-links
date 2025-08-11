@@ -69,6 +69,9 @@ export class LinksService {
         ...linkData,
         userId: user.uid,
         viewIds: initialViewIds,
+        isCluster: linkData.isCluster || false,
+        clusterUrls: linkData.clusterUrls || [],
+        openInSeparateWindows: linkData.openInSeparateWindows || false,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -147,6 +150,9 @@ export class LinksService {
           tags: data['tags'] || [],
           userId: data['userId'],
           viewIds: data['viewIds'] || [],
+          isCluster: data['isCluster'] || false,
+          clusterUrls: data['clusterUrls'] || [],
+          openInSeparateWindows: data['openInSeparateWindows'] || false,
           createdAt: data['createdAt'] ? data['createdAt'].toDate() : new Date(),
           updatedAt: data['updatedAt'] ? data['updatedAt'].toDate() : new Date()
         };
