@@ -4,16 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ThemeService, Theme } from '../../services/theme.service';
 import { LinksService } from '../../services/links.service';
+import { ViewsService } from '../../services/views.service';
 import { AuthService } from '../../services/auth.service';
 import { AdminService } from '../../services/admin.service';
 import { QuickLink } from '../../models/link.model';
+import { View } from '../../models/view.model';
 import { LinkWizardComponent } from '../link-wizard/link-wizard.component';
 import { LinkCardComponent } from '../link-card/link-card.component';
+import { ViewWizardComponent } from '../view-wizard/view-wizard.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, LinkWizardComponent, LinkCardComponent],
+  imports: [CommonModule, FormsModule, LinkWizardComponent, LinkCardComponent, ViewWizardComponent],
   template: `
     <div class="dashboard">
       <header class="dashboard-header">
@@ -124,6 +127,54 @@ import { LinkCardComponent } from '../link-card/link-card.component';
 
       <main class="dashboard-main">
         <div class="container">
+          <!-- View Tabs -->
+          <div class="view-tabs" *ngIf="views.length > 0">
+            <div class="tabs-container">
+              <button 
+                *ngFor="let view of views"
+                class="tab-button"
+                [class.active]="currentView?.id === view.id"
+                (click)="selectView(view)"
+                [style.--tab-color]="view.color">
+                <div class="tab-content">
+                  <div class="tab-icon" [style.background]="view.color">
+                    <i [class]="view.icon"></i>
+                  </div>
+                  <span class="tab-name">{{ view.name }}</span>
+                  <span class="link-count" *ngIf="getViewLinkCount(view.id) > 0">
+                    {{ getViewLinkCount(view.id) }}
+                  </span>
+                </div>
+              </button>
+              
+              <button 
+                class="tab-button add-view-tab"
+                (click)="showViewWizard = true"
+                title="Create New View">
+                <div class="tab-content">
+                  <div class="tab-icon add-icon">
+                    <i class="fas fa-plus"></i>
+                  </div>
+                  <span class="tab-name">New View</span>
+                </div>
+              </button>
+            </div>
+            
+            <div class="view-actions" *ngIf="currentView && !currentView.isDefault">
+              <button 
+                class="btn btn-sm btn-secondary"
+                (click)="editCurrentView()"
+                title="Edit View">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button 
+                class="btn btn-sm btn-danger"
+                (click)="deleteCurrentView()"
+                title="Delete View">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
           <div class="search-section mb-6">
             <div class="search-box">
               <i class="fas fa-search search-icon"></i>
@@ -207,6 +258,14 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       (save)="onLinkSave($event)"
       (cancel)="onWizardCancel()">
     </app-link-wizard>
+
+    <app-view-wizard
+      *ngIf="showViewWizard"
+      [editView]="editingView"
+      [availableLinks]="links"
+      (save)="onViewSave($event)"
+      (cancel)="onViewWizardCancel()">
+    </app-view-wizard>
   `,
   styles: [`
     .dashboard-header {
@@ -663,6 +722,111 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       font-weight: 500;
     }
 
+    .view-tabs {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      gap: 2rem;
+    }
+
+    .tabs-container {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      flex: 1;
+    }
+
+    .tab-button {
+      display: flex;
+      align-items: center;
+      padding: 0;
+      border: none;
+      background: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      min-width: fit-content;
+    }
+
+    .tab-button:hover {
+      transform: translateY(-1px);
+    }
+
+    .tab-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      background-color: var(--surface-color);
+      transition: all 0.3s ease;
+    }
+
+    .tab-button.active .tab-content {
+      border-color: var(--tab-color, var(--primary-color));
+      background-color: var(--background-color);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-icon {
+      width: 2rem;
+      height: 2rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+
+    .tab-icon.add-icon {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .tab-name {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-size: 0.875rem;
+    }
+
+    .link-count {
+      background-color: var(--tab-color, var(--primary-color));
+      color: white;
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-full);
+      min-width: 1.25rem;
+      text-align: center;
+    }
+
+    .add-view-tab .tab-content {
+      border-style: dashed;
+      border-color: var(--primary-color);
+      opacity: 0.8;
+    }
+
+    .add-view-tab:hover .tab-content {
+      opacity: 1;
+      background-color: var(--primary-color);
+      border-style: solid;
+    }
+
+    .add-view-tab:hover .tab-name {
+      color: white;
+    }
+
+    .view-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
     .empty-state {
       text-align: center;
       padding: 4rem 1rem;
@@ -732,6 +896,19 @@ import { LinkCardComponent } from '../link-card/link-card.component';
         min-width: auto;
       }
 
+      .view-tabs {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .tabs-container {
+        justify-content: flex-start;
+      }
+
+      .view-actions {
+        justify-content: center;
+      }
+
       .theme-dropdown {
         min-width: 160px;
       }
@@ -770,6 +947,14 @@ import { LinkCardComponent } from '../link-card/link-card.component';
         gap: 0.75rem;
       }
 
+      .tab-content {
+        padding: 0.5rem 0.75rem;
+      }
+
+      .tab-name {
+        font-size: 0.75rem;
+      }
+
       .add-link-section {
         justify-self: center;
       }
@@ -794,10 +979,15 @@ export class DashboardComponent implements OnInit {
   searchQuery = '';
   selectedTags: string[] = [];
   editMode = false;
+  showViewWizard = false;
+  editingView: View | null = null;
   
   links: QuickLink[] = [];
   filteredLinks: QuickLink[] = [];
   availableTags: string[] = [];
+  
+  views: View[] = [];
+  currentView: View | null = null;
 
   themes = [
     { value: 'light' as Theme, name: 'Light', primary: '#667eea', secondary: '#764ba2', background: '#f8fafc' },
@@ -830,6 +1020,7 @@ export class DashboardComponent implements OnInit {
   constructor(
     private themeService: ThemeService,
     private linksService: LinksService,
+    private viewsService: ViewsService,
     private authService: AuthService,
     private adminService: AdminService,
     private router: Router
@@ -846,6 +1037,17 @@ export class DashboardComponent implements OnInit {
       this.links = links;
       this.updateFilteredLinks();
       this.updateAvailableTags();
+    });
+    
+    // Subscribe to views from the service
+    this.viewsService.getUserViews().subscribe(views => {
+      this.views = views;
+    });
+    
+    // Subscribe to current view
+    this.viewsService.getCurrentView().subscribe(view => {
+      this.currentView = view;
+      this.updateFilteredLinks();
     });
   }
 
@@ -896,7 +1098,21 @@ export class DashboardComponent implements OnInit {
 
   updateFilteredLinks() {
     let filtered = this.links;
+    
+    // Filter by current view first
+    if (this.currentView) {
+      if (this.currentView.isDefault) {
+        // Default view shows all links
+        filtered = this.links;
+      } else {
+        // Custom view shows only links in that view
+        filtered = this.links.filter(link => 
+          link.viewIds && link.viewIds.includes(this.currentView!.id)
+        );
+      }
+    }
 
+    // Then apply search filter
     if (this.searchQuery) {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(link => 
@@ -906,6 +1122,7 @@ export class DashboardComponent implements OnInit {
       );
     }
 
+    // Finally apply tag filter
     if (this.selectedTags.length > 0) {
       filtered = filtered.filter(link =>
         this.selectedTags.some(selectedTag => 
@@ -939,7 +1156,10 @@ export class DashboardComponent implements OnInit {
       if (this.editingLink) {
         await this.linksService.updateLink(this.editingLink.id, linkData);
       } else {
-        await this.linksService.addLink(linkData);
+        // Add to current view if it's not the default view
+        const viewId = this.currentView && !this.currentView.isDefault ? 
+          this.currentView.id : undefined;
+        await this.linksService.addLink(linkData, viewId);
       }
       // The service will automatically update the links observable
       this.onWizardCancel();
@@ -990,12 +1210,62 @@ export class DashboardComponent implements OnInit {
     this.updateAvailableTags();
   }
 
+  selectView(view: View) {
+    this.viewsService.setCurrentView(view);
+  }
+
+  getViewLinkCount(viewId: string): number {
+    if (this.views.find(v => v.id === viewId)?.isDefault) {
+      return this.links.length;
+    }
+    return this.links.filter(link => link.viewIds && link.viewIds.includes(viewId)).length;
+  }
+
+  editCurrentView() {
+    if (this.currentView && !this.currentView.isDefault) {
+      this.editingView = this.currentView;
+      this.showViewWizard = true;
+    }
+  }
+
+  async deleteCurrentView() {
+    if (!this.currentView || this.currentView.isDefault) return;
+    
+    if (confirm(`Are you sure you want to delete the "${this.currentView.name}" view? Links in this view will not be deleted.`)) {
+      try {
+        await this.viewsService.deleteView(this.currentView.id);
+      } catch (error) {
+        console.error('Error deleting view:', error);
+        alert('Failed to delete view. Please try again.');
+      }
+    }
+  }
+
+  async onViewSave(viewData: any) {
+    try {
+      if (this.editingView) {
+        await this.viewsService.updateView(this.editingView.id, viewData);
+      } else {
+        const newView = await this.viewsService.createView(viewData);
+        this.viewsService.setCurrentView(newView);
+      }
+      this.onViewWizardCancel();
+    } catch (error) {
+      console.error('Error saving view:', error);
+      alert('Failed to save view. Please try again.');
+    }
+  }
+
+  onViewWizardCancel() {
+    this.showViewWizard = false;
+    this.editingView = null;
+  }
+
   private updateAvailableTags() {
     const tagSet = new Set<string>();
-    this.links.forEach(link => {
+    this.filteredLinks.forEach(link => {
       link.tags.forEach(tag => tagSet.add(tag));
     });
     this.availableTags = Array.from(tagSet).sort();
-    localStorage.setItem('quickLinks', JSON.stringify(this.links));
   }
 }

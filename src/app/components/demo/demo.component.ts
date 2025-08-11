@@ -616,6 +616,7 @@ export class DemoComponent implements OnInit {
         icon: 'fab fa-github',
         tags: ['development', 'git', 'collaboration'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15')
       },
@@ -627,6 +628,7 @@ export class DemoComponent implements OnInit {
         icon: 'fas fa-code',
         tags: ['development', 'editor', 'tools'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-01-20'),
         updatedAt: new Date('2024-01-20')
       },
@@ -638,6 +640,7 @@ export class DemoComponent implements OnInit {
         icon: 'fab fa-stack-overflow',
         tags: ['development', 'help', 'community'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-01-25'),
         updatedAt: new Date('2024-01-25')
       },
@@ -649,6 +652,7 @@ export class DemoComponent implements OnInit {
         icon: 'fab fa-docker',
         tags: ['devops', 'containers', 'deployment'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-02-01'),
         updatedAt: new Date('2024-02-01')
       },
@@ -660,6 +664,7 @@ export class DemoComponent implements OnInit {
         icon: 'fab fa-aws',
         tags: ['cloud', 'aws', 'infrastructure'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-02-05'),
         updatedAt: new Date('2024-02-05')
       },
@@ -671,6 +676,7 @@ export class DemoComponent implements OnInit {
         icon: 'fas fa-paint-brush',
         tags: ['design', 'ui', 'prototyping'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-02-10'),
         updatedAt: new Date('2024-02-10')
       },
@@ -682,6 +688,7 @@ export class DemoComponent implements OnInit {
         icon: 'fas fa-sticky-note',
         tags: ['productivity', 'notes', 'planning'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-02-15'),
         updatedAt: new Date('2024-02-15')
       },
@@ -693,6 +700,7 @@ export class DemoComponent implements OnInit {
         icon: 'fas fa-database',
         tags: ['database', 'mongodb', 'cloud'],
         userId: 'demo',
+        viewIds: [],
         createdAt: new Date('2024-02-20'),
         updatedAt: new Date('2024-02-20')
       }

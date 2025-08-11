@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject, forwardRef } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { 
   collection,
@@ -45,14 +45,18 @@ export class LinksService {
   }
 
   // Add new link
-  async addLink(linkData: CreateLinkRequest): Promise<QuickLink> {
+  async addLink(linkData: CreateLinkRequest, viewId?: string): Promise<QuickLink> {
     const user = this.authService.getCurrentUser();
     if (!user) throw new Error('User not authenticated');
 
     try {
+      // Initialize with view ID if provided
+      const initialViewIds = viewId ? [viewId] : [];
+
       const linkToAdd = {
         ...linkData,
         userId: user.uid,
+        viewIds: initialViewIds,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now()
       };
@@ -63,6 +67,7 @@ export class LinksService {
         id: docRef.id,
         ...linkData,
         userId: user.uid,
+        viewIds: initialViewIds,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -140,6 +145,7 @@ export class LinksService {
           icon: data['icon'],
           tags: data['tags'] || [],
           userId: data['userId'],
+          viewIds: data['viewIds'] || [],
           createdAt: data['createdAt'] ? data['createdAt'].toDate() : new Date(),
           updatedAt: data['updatedAt'] ? data['updatedAt'].toDate() : new Date()
         };
@@ -148,6 +154,41 @@ export class LinksService {
     }, (error) => {
       console.error('Error loading links:', error);
     });
+  }
+
+  // Add link to view
+  async addLinkToView(linkId: string, viewId: string): Promise<void> {
+    const currentLinks = this.linksSubject.value;
+    const link = currentLinks.find(l => l.id === linkId);
+    
+    if (!link) throw new Error('Link not found');
+    if (link.viewIds.includes(viewId)) return; // Already in view
+
+    const updatedViewIds = [...link.viewIds, viewId];
+    await this.updateLink(linkId, { viewIds: updatedViewIds } as any);
+  }
+
+  // Remove link from view
+  async removeLinkFromView(linkId: string, viewId: string): Promise<void> {
+    const currentLinks = this.linksSubject.value;
+    const link = currentLinks.find(l => l.id === linkId);
+    
+    if (!link) throw new Error('Link not found');
+
+    const updatedViewIds = link.viewIds.filter(id => id !== viewId);
+    await this.updateLink(linkId, { viewIds: updatedViewIds } as any);
+  }
+
+  // Get links for a specific view
+  getLinksForView(viewId: string): QuickLink[] {
+    const allLinks = this.linksSubject.value;
+    return allLinks.filter(link => link.viewIds.includes(viewId));
+  }
+
+  // Get links not in any view (orphaned links)
+  getOrphanedLinks(): QuickLink[] {
+    const allLinks = this.linksSubject.value;
+    return allLinks.filter(link => !link.viewIds || link.viewIds.length === 0);
   }
 
   // Clean up subscription when service is destroyed

@@ -6,6 +6,7 @@ export interface QuickLink {
   icon: string;
   tags: string[];
   userId: string;
+  viewIds: string[]; // Array of view IDs this link belongs to
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,4 +17,5 @@ export interface CreateLinkRequest {
   url: string;
   icon: string;
   tags: string[];
+  viewIds?: string[];
 }
