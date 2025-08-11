@@ -29,27 +29,7 @@ import { ThemeService } from '../../services/theme.service';
           </button>
         </div>
 
-        <!-- Hidden HTML form for Netlify detection -->
-        <form 
-          name="access-requests" 
-          method="POST" 
-          data-netlify="true"
-          style="display: none;">
-          <input type="text" name="name" />
-          <input type="email" name="email" />
-          <select name="referral_source">
-            <option value="friend">Friend or colleague</option>
-            <option value="social-media">Social media</option>
-            <option value="search-engine">Search engine</option>
-            <option value="github">GitHub</option>
-            <option value="dev-community">Developer community/forum</option>
-            <option value="blog">Blog or article</option>
-            <option value="other">Other</option>
-          </select>
-          <textarea name="comments"></textarea>
-        </form>
-
-        <!-- JavaScript-rendered form -->
+        <!-- JavaScript form (static HTML form is in /public/netlify-forms.html for detection) -->
         <form 
           *ngIf="!submitted"
           name="access-requests"

@@ -1,0 +1,18 @@
+<!-- Static HTML forms for Netlify detection -->
+<!-- This file ensures Netlify detects our forms during build -->
+
+<form name="access-requests" method="POST" data-netlify="true" style="display: none;">
+  <input type="text" name="name" placeholder="Full Name" />
+  <input type="email" name="email" placeholder="Email Address" />
+  <select name="referral_source">
+    <option value="">Select an option</option>
+    <option value="friend">Friend or colleague</option>
+    <option value="social-media">Social media</option>
+    <option value="search-engine">Search engine</option>
+    <option value="github">GitHub</option>
+    <option value="dev-community">Developer community/forum</option>
+    <option value="blog">Blog or article</option>
+    <option value="other">Other</option>
+  </select>
+  <textarea name="comments" placeholder="Additional comments"></textarea>
+</form>
