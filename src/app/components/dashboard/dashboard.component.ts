@@ -1335,9 +1335,9 @@ export class DashboardComponent implements OnInit {
   }
 
   showClusterHelp() {
-    const helpMessage = `Cluster links open multiple URLs at once.
+    const helpMessage = `Cluster links open multiple URLs at once in new tabs.
 
-To use clusters properly, please allow popups:
+To use clusters properly, allow popups for this site:
 
 • Chrome: Click popup blocked icon in address bar → "Always allow"
 • Firefox: Click shield icon → "Disable Blocking"  

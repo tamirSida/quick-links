@@ -71,7 +71,6 @@ export class LinksService {
         viewIds: initialViewIds,
         isCluster: linkData.isCluster || false,
         clusterUrls: linkData.clusterUrls || [],
-        openInSeparateWindows: linkData.openInSeparateWindows || false,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -152,7 +151,6 @@ export class LinksService {
           viewIds: data['viewIds'] || [],
           isCluster: data['isCluster'] || false,
           clusterUrls: data['clusterUrls'] || [],
-          openInSeparateWindows: data['openInSeparateWindows'] || false,
           createdAt: data['createdAt'] ? data['createdAt'].toDate() : new Date(),
           updatedAt: data['updatedAt'] ? data['updatedAt'].toDate() : new Date()
         };

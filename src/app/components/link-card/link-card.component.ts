@@ -354,22 +354,12 @@ export class LinkCardComponent {
   private openCluster() {
     if (this.link.clusterUrls.length === 0) return;
     
-    if (this.link.openInSeparateWindows) {
-      // Open each URL in a completely separate browser window
-      this.link.clusterUrls.forEach((url, index) => {
-        setTimeout(() => {
-          // Use window.open with specific window features for separate windows
-          window.open(url, `cluster_window_${Date.now()}_${index}`, 'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=yes,location=yes');
-        }, index * 100);
-      });
-    } else {
-      // Open each URL as a new tab (default browser behavior)
-      this.link.clusterUrls.forEach((url, index) => {
-        setTimeout(() => {
-          window.open(url, '_blank', 'noopener,noreferrer');
-        }, index * 50);
-      });
-    }
+    // Open each URL as a new tab
+    this.link.clusterUrls.forEach((url, index) => {
+      setTimeout(() => {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }, index * 50);
+    });
   }
 
   onEdit(event: Event) {

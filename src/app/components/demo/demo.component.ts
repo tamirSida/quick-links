@@ -619,7 +619,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-01-15'),
         updatedAt: new Date('2024-01-15')
       },
@@ -634,7 +633,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-01-20'),
         updatedAt: new Date('2024-01-20')
       },
@@ -649,7 +647,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-01-25'),
         updatedAt: new Date('2024-01-25')
       },
@@ -664,7 +661,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-02-01'),
         updatedAt: new Date('2024-02-01')
       },
@@ -679,7 +675,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-02-05'),
         updatedAt: new Date('2024-02-05')
       },
@@ -694,7 +689,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-02-10'),
         updatedAt: new Date('2024-02-10')
       },
@@ -709,7 +703,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-02-15'),
         updatedAt: new Date('2024-02-15')
       },
@@ -724,7 +717,6 @@ export class DemoComponent implements OnInit {
         viewIds: [],
         isCluster: false,
         clusterUrls: [],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-02-20'),
         updatedAt: new Date('2024-02-20')
       },
@@ -743,7 +735,6 @@ export class DemoComponent implements OnInit {
           'https://stackoverflow.com',
           'https://code.visualstudio.com'
         ],
-        openInSeparateWindows: false,
         createdAt: new Date('2024-02-25'),
         updatedAt: new Date('2024-02-25')
       }

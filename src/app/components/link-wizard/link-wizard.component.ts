@@ -141,31 +141,6 @@ import { DEV_ICONS, ICON_CATEGORIES } from '../../data/dev-icons';
               </div>
             </div>
 
-            <!-- Cluster Opening Options -->
-            <div class="form-group" *ngIf="formData.isCluster">
-              <label class="form-label">
-                <i class="fas fa-window-restore"></i>
-                Opening Behavior
-              </label>
-              <div class="radio-group">
-                <label class="radio-label">
-                  <input
-                    type="radio"
-                    name="openBehavior"
-                    [value]="false"
-                    [(ngModel)]="formData.openInSeparateWindows">
-                  <span>Open all in one window (tabs)</span>
-                </label>
-                <label class="radio-label">
-                  <input
-                    type="radio"
-                    name="openBehavior"
-                    [value]="true"
-                    [(ngModel)]="formData.openInSeparateWindows">
-                  <span>Open in separate windows</span>
-                </label>
-              </div>
-            </div>
 
             <div class="form-group">
               <label class="form-label">
@@ -564,27 +539,6 @@ import { DEV_ICONS, ICON_CATEGORIES } from '../../data/dev-icons';
       word-break: break-all;
     }
 
-    .radio-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      margin-top: 0.5rem;
-    }
-
-    .radio-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.875rem;
-      color: var(--text-primary);
-      cursor: pointer;
-    }
-
-    .radio-label input[type="radio"] {
-      width: 1rem;
-      height: 1rem;
-      cursor: pointer;
-    }
 
     @media (max-width: 640px) {
       .wizard-modal {
@@ -618,8 +572,7 @@ export class LinkWizardComponent implements OnInit {
     icon: 'fas fa-link',
     tags: [],
     isCluster: false,
-    clusterUrls: [],
-    openInSeparateWindows: false
+    clusterUrls: []
   };
 
   currentTag = '';
@@ -644,8 +597,7 @@ export class LinkWizardComponent implements OnInit {
         icon: this.editLink.icon,
         tags: [...this.editLink.tags],
         isCluster: this.editLink.isCluster || false,
-        clusterUrls: [...(this.editLink.clusterUrls || [])],
-        openInSeparateWindows: this.editLink.openInSeparateWindows || false
+        clusterUrls: [...(this.editLink.clusterUrls || [])]
       };
     }
   }
