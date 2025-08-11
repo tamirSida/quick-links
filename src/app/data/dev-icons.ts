@@ -55,6 +55,7 @@ export const DEV_ICONS = [
   { value: 'fas fa-cloud', label: 'Generic Cloud', category: 'Cloud Providers' },
   { value: 'fas fa-server', label: 'On-Premise', category: 'Cloud Providers' },
   { value: 'fas fa-globe-americas', label: 'CDN', category: 'Cloud Providers' },
+  { value: 'fas fa-rocket', label: 'Netlify', category: 'Cloud Providers' },
 
   // DevOps & CI/CD
   { value: 'fab fa-docker', label: 'Docker', category: 'DevOps' },
@@ -129,6 +130,8 @@ export const DEV_ICONS = [
   { value: 'fas fa-comments', label: 'Teams', category: 'Communication' },
   { value: 'fab fa-discord', label: 'Discord', category: 'Communication' },
   { value: 'fas fa-video', label: 'Video Call', category: 'Communication' },
+  { value: 'fas fa-envelope', label: 'Gmail', category: 'Communication' },
+  { value: 'fas fa-graduation-cap', label: 'Moodle', category: 'Communication' },
   { value: 'fas fa-tasks', label: 'Project Mgmt', category: 'Management' },
   { value: 'fab fa-jira', label: 'Jira', category: 'Management' },
   { value: 'fab fa-trello', label: 'Trello', category: 'Management' },
@@ -156,13 +159,79 @@ export const DEV_ICONS = [
   { value: 'fas fa-users', label: 'Customers', category: 'Business' },
   { value: 'fas fa-handshake', label: 'CRM', category: 'Business' },
 
+  // Social Media & Entertainment
+  { value: 'fab fa-facebook', label: 'Facebook', category: 'Social Media' },
+  { value: 'fab fa-twitter', label: 'Twitter', category: 'Social Media' },
+  { value: 'fab fa-instagram', label: 'Instagram', category: 'Social Media' },
+  { value: 'fab fa-linkedin', label: 'LinkedIn', category: 'Social Media' },
+  { value: 'fab fa-youtube', label: 'YouTube', category: 'Social Media' },
+  { value: 'fab fa-tiktok', label: 'TikTok', category: 'Social Media' },
+  { value: 'fab fa-reddit', label: 'Reddit', category: 'Social Media' },
+  { value: 'fab fa-pinterest', label: 'Pinterest', category: 'Social Media' },
+  { value: 'fab fa-snapchat', label: 'Snapchat', category: 'Social Media' },
+  { value: 'fab fa-whatsapp', label: 'WhatsApp', category: 'Social Media' },
+  { value: 'fab fa-telegram', label: 'Telegram', category: 'Social Media' },
+  { value: 'fab fa-spotify', label: 'Spotify', category: 'Entertainment' },
+  { value: 'fas fa-music', label: 'Music', category: 'Entertainment' },
+  { value: 'fas fa-film', label: 'Movies', category: 'Entertainment' },
+  { value: 'fas fa-tv', label: 'TV Shows', category: 'Entertainment' },
+  { value: 'fas fa-gamepad', label: 'Gaming', category: 'Entertainment' },
+  { value: 'fab fa-twitch', label: 'Twitch', category: 'Entertainment' },
+  { value: 'fas fa-podcast', label: 'Podcasts', category: 'Entertainment' },
+
+  // Finance
+  { value: 'fab fa-amazon', label: 'Amazon', category: 'Finance' },
+  { value: 'fas fa-shopping-cart', label: 'Shopping', category: 'Finance' },
+  { value: 'fas fa-credit-card', label: 'Banking', category: 'Finance' },
+  { value: 'fab fa-paypal', label: 'PayPal', category: 'Finance' },
+  { value: 'fas fa-coins', label: 'Investments', category: 'Finance' },
+  { value: 'fas fa-chart-line', label: 'Stocks', category: 'Finance' },
+  { value: 'fas fa-piggy-bank', label: 'Savings', category: 'Finance' },
+
+  // Productivity & Work
+  { value: 'fab fa-google-drive', label: 'Google Drive', category: 'Productivity' },
+  { value: 'fab fa-dropbox', label: 'Dropbox', category: 'Productivity' },
+  { value: 'fas fa-file-pdf', label: 'PDF', category: 'Productivity' },
+  { value: 'fas fa-file-word', label: 'Word', category: 'Productivity' },
+  { value: 'fas fa-file-excel', label: 'Excel', category: 'Productivity' },
+  { value: 'fas fa-file-powerpoint', label: 'PowerPoint', category: 'Productivity' },
+  { value: 'fas fa-calculator', label: 'Calculator', category: 'Productivity' },
+  { value: 'fas fa-calendar', label: 'Calendar', category: 'Productivity' },
+  { value: 'fas fa-clock', label: 'Time Tracking', category: 'Productivity' },
+  { value: 'fas fa-sticky-note', label: 'Notes', category: 'Productivity' },
+
+  // Health & Fitness
+  { value: 'fas fa-heartbeat', label: 'Health', category: 'Health & Fitness' },
+  { value: 'fas fa-dumbbell', label: 'Fitness', category: 'Health & Fitness' },
+  { value: 'fas fa-running', label: 'Running', category: 'Health & Fitness' },
+  { value: 'fas fa-bicycle', label: 'Cycling', category: 'Health & Fitness' },
+  { value: 'fas fa-apple-alt', label: 'Nutrition', category: 'Health & Fitness' },
+  { value: 'fas fa-bed', label: 'Sleep', category: 'Health & Fitness' },
+
+  // Travel & Maps
+  { value: 'fas fa-plane', label: 'Travel', category: 'Travel' },
+  { value: 'fas fa-map-marked-alt', label: 'Maps', category: 'Travel' },
+  { value: 'fas fa-hotel', label: 'Hotels', category: 'Travel' },
+  { value: 'fas fa-car', label: 'Transportation', category: 'Travel' },
+  { value: 'fas fa-train', label: 'Train', category: 'Travel' },
+  { value: 'fas fa-compass', label: 'Navigation', category: 'Travel' },
+
+  // News & Weather
+  { value: 'fas fa-newspaper', label: 'News', category: 'News & Weather' },
+  { value: 'fas fa-cloud-sun', label: 'Weather', category: 'News & Weather' },
+  { value: 'fas fa-rss-square', label: 'RSS', category: 'News & Weather' },
+
   // Generic/Utility
   { value: 'fas fa-star', label: 'Favorite', category: 'Utility' },
   { value: 'fas fa-bookmark', label: 'Bookmark', category: 'Utility' },
   { value: 'fas fa-flag', label: 'Flag', category: 'Utility' },
   { value: 'fas fa-thumbs-up', label: 'Approved', category: 'Utility' },
   { value: 'fas fa-exclamation-triangle', label: 'Warning', category: 'Utility' },
-  { value: 'fas fa-info-circle', label: 'Information', category: 'Utility' }
+  { value: 'fas fa-info-circle', label: 'Information', category: 'Utility' },
+  { value: 'fas fa-home', label: 'Home', category: 'Utility' },
+  { value: 'fas fa-user', label: 'Profile', category: 'Utility' },
+  { value: 'fas fa-phone', label: 'Phone', category: 'Utility' },
+  { value: 'fas fa-envelope', label: 'Email', category: 'Utility' }
 ];
 
 export const ICON_CATEGORIES = [
@@ -184,5 +253,12 @@ export const ICON_CATEGORIES = [
   'Documentation',
   'Integration',
   'Business',
+  'Social Media',
+  'Entertainment',
+  'Finance',
+  'Productivity',
+  'Health & Fitness',
+  'Travel',
+  'News & Weather',
   'Utility'
 ];
