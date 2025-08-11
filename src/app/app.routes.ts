@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { SignInComponent } from './components/auth/sign-in.component';
+import { RequestAccessComponent } from './components/auth/request-access.component';
 import { PendingApprovalComponent } from './components/auth/pending-approval.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AdminDashboardComponent } from './components/admin/admin-dashboard.component';
@@ -9,6 +10,7 @@ import { AdminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   { path: '', component: SignInComponent },
+  { path: 'request-access', component: RequestAccessComponent },
   { path: 'pending-approval', component: PendingApprovalComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
   { path: 'admin', component: AdminDashboardComponent, canActivate: [AdminGuard] },

@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { 
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   setPersistence,
@@ -35,9 +34,9 @@ export class AuthService {
 
   private async initializeAuth() {
     try {
-      // Set default persistence to session (will be overridden by sign-in preference)
-      await setPersistence(auth, browserSessionPersistence);
-      console.log('✅ Firebase persistence initialized to SESSION (default)');
+      // Set default persistence to local (remember users by default)
+      await setPersistence(auth, browserLocalPersistence);
+      console.log('✅ Firebase persistence initialized to LOCAL (default)');
     } catch (error) {
       console.log('❌ Persistence setup failed:', error);
     }
@@ -83,27 +82,6 @@ export class AuthService {
     }
   }
 
-  async createUserWithEmailAndPassword(email: string, password: string): Promise<User> {
-    try {
-      const credential = await createUserWithEmailAndPassword(auth, email, password);
-      
-      // Track user registration for admin dashboard
-      // We'll import AdminService dynamically to avoid circular dependency
-      const { AdminService } = await import('./admin.service');
-      const adminService = new AdminService();
-      await adminService.trackUserRegistration(credential.user);
-      
-      const user: User = {
-        uid: credential.user.uid,
-        email: credential.user.email || '',
-        displayName: credential.user.displayName || undefined,
-        approved: false // New users start unapproved
-      };
-      return user;
-    } catch (error: any) {
-      throw error;
-    }
-  }
 
   async signOut(): Promise<void> {
     try {

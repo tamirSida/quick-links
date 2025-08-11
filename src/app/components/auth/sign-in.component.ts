@@ -20,20 +20,6 @@ import { ThemeService } from '../../services/theme.service';
           <p class="brand-subtitle">Your personal homepage for developer tools</p>
         </div>
 
-        <div class="auth-tabs">
-          <button 
-            class="tab-btn"
-            [class.active]="isSignIn"
-            (click)="isSignIn = true">
-            Sign In
-          </button>
-          <button 
-            class="tab-btn"
-            [class.active]="!isSignIn"
-            (click)="isSignIn = false">
-            Sign Up
-          </button>
-        </div>
 
         <form class="auth-form" (ngSubmit)="onSubmit()" #authForm="ngForm">
           <div class="form-group">
@@ -73,7 +59,7 @@ import { ThemeService } from '../../services/theme.service';
             </div>
           </div>
 
-          <div class="form-group remember-me" *ngIf="isSignIn">
+          <div class="form-group remember-me">
             <label class="checkbox-label">
               <input 
                 type="checkbox" 
@@ -91,9 +77,8 @@ import { ThemeService } from '../../services/theme.service';
               class="btn btn-primary auth-btn"
               [disabled]="authForm.invalid || loading">
               <i class="fas fa-spinner fa-spin" *ngIf="loading"></i>
-              <i class="fas fa-sign-in-alt" *ngIf="!loading && isSignIn"></i>
-              <i class="fas fa-user-plus" *ngIf="!loading && !isSignIn"></i>
-              {{ loading ? 'Please wait...' : (isSignIn ? 'Sign In' : 'Create Account') }}
+              <i class="fas fa-sign-in-alt" *ngIf="!loading"></i>
+              {{ loading ? 'Please wait...' : 'Sign In' }}
             </button>
           </div>
 
@@ -102,6 +87,19 @@ import { ThemeService } from '../../services/theme.service';
             {{ errorMessage }}
           </div>
         </form>
+
+        <div class="request-access-section">
+          <div class="divider">
+            <span>New User?</span>
+          </div>
+          <button 
+            type="button" 
+            class="btn btn-secondary request-btn"
+            (click)="requestAccess()">
+            <i class="fas fa-user-plus"></i>
+            Request Access
+          </button>
+        </div>
 
         <div class="footer-links">
           <p class="text-sm">
@@ -345,7 +343,11 @@ import { ThemeService } from '../../services/theme.service';
       letter-spacing: 0.05em;
     }
 
-    .demo-btn {
+    .request-access-section {
+      margin-bottom: 2rem;
+    }
+
+    .request-btn {
       width: 100%;
       padding: 0.875rem 1.5rem;
       font-size: 0.875rem;
@@ -378,10 +380,9 @@ import { ThemeService } from '../../services/theme.service';
   `]
 })
 export class SignInComponent {
-  isSignIn = true;
   email = '';
   password = '';
-  rememberMe = false;
+  rememberMe = true;
   loading = false;
   errorMessage = '';
 
@@ -398,12 +399,7 @@ export class SignInComponent {
     this.errorMessage = '';
 
     try {
-      if (this.isSignIn) {
-        await this.authService.signInWithEmailAndPassword(this.email, this.password, this.rememberMe);
-      } else {
-        await this.authService.createUserWithEmailAndPassword(this.email, this.password);
-      }
-      
+      await this.authService.signInWithEmailAndPassword(this.email, this.password, this.rememberMe);
       // Go directly to dashboard
       this.router.navigate(['/dashboard']);
     } catch (error: any) {
@@ -411,6 +407,10 @@ export class SignInComponent {
     } finally {
       this.loading = false;
     }
+  }
+
+  requestAccess() {
+    this.router.navigate(['/request-access']);
   }
 
 
