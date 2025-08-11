@@ -35,9 +35,9 @@ export class AuthService {
 
   private async initializeAuth() {
     try {
-      // Set default persistence to local for all users
-      await setPersistence(auth, browserLocalPersistence);
-      console.log('✅ Firebase persistence set to LOCAL');
+      // Set default persistence to session (will be overridden by sign-in preference)
+      await setPersistence(auth, browserSessionPersistence);
+      console.log('✅ Firebase persistence initialized to SESSION (default)');
     } catch (error) {
       console.log('❌ Persistence setup failed:', error);
     }
@@ -65,8 +65,10 @@ export class AuthService {
 
   async signInWithEmailAndPassword(email: string, password: string, rememberMe: boolean = true): Promise<User> {
     try {
-      // Ensure persistence is set before signing in
-      await setPersistence(auth, browserLocalPersistence);
+      // Set persistence based on rememberMe preference
+      const persistenceType = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+      await setPersistence(auth, persistenceType);
+      console.log(`🔐 Authentication persistence set to: ${rememberMe ? 'LOCAL (remembered)' : 'SESSION (not remembered)'}`);
       
       const credential = await signInWithEmailAndPassword(auth, email, password);
       // Auth state change listener will handle setting the user
