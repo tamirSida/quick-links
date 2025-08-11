@@ -802,10 +802,15 @@ import { ViewWizardComponent } from '../view-wizard/view-wizard.component';
       color: white;
       font-size: 0.625rem;
       font-weight: 600;
-      padding: 0.25rem 0.5rem;
-      border-radius: var(--radius-full);
-      min-width: 1.25rem;
-      text-align: center;
+      padding: 0.25rem;
+      border-radius: 50%;
+      min-width: 1.5rem;
+      min-height: 1.5rem;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .add-view-tab .tab-content {
