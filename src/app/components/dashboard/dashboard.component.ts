@@ -70,8 +70,24 @@ import { LinkCardComponent } from '../link-card/link-card.component';
                   <button 
                     class="btn btn-primary add-link-btn"
                     (click)="showWizard = true"
-                    title="Add Link">
+                    title="Add Link"
+                    [disabled]="editMode">
                     <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+
+                <div class="edit-mode-section">
+                  <label class="add-link-label">
+                    <i class="fas fa-edit"></i>
+                    Edit
+                  </label>
+                  <button 
+                    class="btn edit-mode-btn"
+                    [class.btn-warning]="editMode"
+                    [class.btn-secondary]="!editMode"
+                    (click)="toggleEditMode()"
+                    [title]="editMode ? 'Exit Edit Mode' : 'Enter Edit Mode'">
+                    <i [class]="editMode ? 'fas fa-check' : 'fas fa-edit'"></i>
                   </button>
                 </div>
 
@@ -133,13 +149,16 @@ import { LinkCardComponent } from '../link-card/link-card.component';
             </div>
           </div>
 
-          <div class="links-grid" *ngIf="filteredLinks.length > 0">
+          <div class="links-grid" *ngIf="filteredLinks.length > 0" [class.edit-mode]="editMode">
             <div class="grid grid-cols-4">
               <app-link-card 
-                *ngFor="let link of filteredLinks"
+                *ngFor="let link of filteredLinks; let i = index"
                 [link]="link"
+                [editMode]="editMode"
+                [index]="i"
                 (edit)="editLink($event)"
-                (delete)="deleteLink($event)">
+                (delete)="deleteLink($event)"
+                (reorder)="reorderLinks($event)">
               </app-link-card>
             </div>
           </div>
@@ -151,14 +170,30 @@ import { LinkCardComponent } from '../link-card/link-card.component';
               <p *ngIf="searchQuery || selectedTags.length > 0">
                 Try adjusting your search or filters
               </p>
-              <p *ngIf="!searchQuery && selectedTags.length === 0">
+              <p *ngIf="!searchQuery && selectedTags.length === 0 && !editMode">
                 Get started by adding your first quick link
+              </p>
+              <p *ngIf="editMode">
+                Exit edit mode to add new links
               </p>
               <button 
                 class="btn btn-primary mt-4"
-                (click)="showWizard = true">
+                (click)="showWizard = true"
+                [disabled]="editMode"
+                *ngIf="!editMode">
                 <i class="fas fa-plus"></i>
                 Add Your First Link
+              </button>
+            </div>
+          </div>
+
+          <div class="edit-mode-banner" *ngIf="editMode && filteredLinks.length > 0">
+            <div class="banner-content">
+              <i class="fas fa-info-circle"></i>
+              <span>Edit mode active: Tap edit/delete buttons or drag to reorder links</span>
+              <button class="btn btn-sm btn-warning" (click)="toggleEditMode()">
+                <i class="fas fa-check"></i>
+                Done
               </button>
             </div>
           </div>
@@ -221,20 +256,21 @@ import { LinkCardComponent } from '../link-card/link-card.component';
 
     .actions-grid {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto auto auto;
       gap: 2.5rem;
       align-items: end;
       width: 100%;
-      min-width: 350px;
+      min-width: 450px;
     }
 
     .actions-grid.admin {
-      grid-template-columns: 1fr auto auto auto;
-      min-width: 450px;
+      grid-template-columns: 1fr auto auto auto auto;
+      min-width: 550px;
     }
 
     .theme-selector,
     .add-link-section,
+    .edit-mode-section,
     .admin-section,
     .sign-out-section {
       position: relative;
@@ -435,12 +471,40 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       flex-shrink: 0;
     }
 
-    .add-link-btn:hover {
+    .add-link-btn:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
 
+    .add-link-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     .add-link-btn i {
+      font-size: 1.25rem;
+    }
+
+    .edit-mode-btn {
+      width: 100%;
+      min-width: 3.5rem;
+      height: 3.5rem;
+      padding: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-radius: var(--radius-lg);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .edit-mode-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .edit-mode-btn i {
       font-size: 1.25rem;
     }
 
@@ -555,6 +619,50 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       margin-top: 2rem;
     }
 
+    .links-grid.edit-mode {
+      animation: none;
+    }
+
+    .links-grid.edit-mode .link-card {
+      animation: wiggle 0.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes wiggle {
+      0% {
+        transform: rotate(-1deg) scale(1.02);
+      }
+      100% {
+        transform: rotate(1deg) scale(1.02);
+      }
+    }
+
+    .edit-mode-banner {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 1px solid #f59e0b;
+      border-radius: var(--radius-lg);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
+    }
+
+    .banner-content {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.875rem;
+      color: #92400e;
+    }
+
+    .banner-content i {
+      color: #f59e0b;
+      font-size: 1rem;
+    }
+
+    .banner-content span {
+      flex: 1;
+      font-weight: 500;
+    }
+
     .empty-state {
       text-align: center;
       padding: 4rem 1rem;
@@ -619,7 +727,7 @@ import { LinkCardComponent } from '../link-card/link-card.component';
       }
 
       .actions-grid {
-        grid-template-columns: 1fr auto;
+        grid-template-columns: 1fr auto auto;
         gap: 1.5rem;
         min-width: auto;
       }
@@ -651,9 +759,15 @@ import { LinkCardComponent } from '../link-card/link-card.component';
 
     @media (max-width: 480px) {
       .actions-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 1rem;
         justify-items: stretch;
+      }
+
+      .banner-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
       }
 
       .add-link-section {
@@ -679,6 +793,7 @@ export class DashboardComponent implements OnInit {
   themeDropdownOpen = false;
   searchQuery = '';
   selectedTags: string[] = [];
+  editMode = false;
   
   links: QuickLink[] = [];
   filteredLinks: QuickLink[] = [];
@@ -856,6 +971,24 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/admin']);
   }
 
+  toggleEditMode() {
+    this.editMode = !this.editMode;
+    // Reset any search/filter when entering edit mode to show all links
+    if (this.editMode) {
+      this.searchQuery = '';
+      this.selectedTags = [];
+      this.updateFilteredLinks();
+    }
+  }
+
+  reorderLinks(event: { fromIndex: number; toIndex: number }) {
+    const item = this.filteredLinks.splice(event.fromIndex, 1)[0];
+    this.filteredLinks.splice(event.toIndex, 0, item);
+    
+    // Update the original links array order
+    this.links = [...this.filteredLinks];
+    this.updateAvailableTags();
+  }
 
   private updateAvailableTags() {
     const tagSet = new Set<string>();

@@ -7,12 +7,18 @@ import { QuickLink } from '../../models/link.model';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="link-card" (click)="openLink()">
+    <div class="link-card" 
+         [class.edit-mode]="editMode"
+         (click)="!editMode && openLink()"
+         draggable="{{editMode}}"
+         (dragstart)="onDragStart($event)"
+         (dragover)="onDragOver($event)"
+         (drop)="onDrop($event)">
       <div class="card-header">
         <div class="icon-container">
           <i [class]="link.icon"></i>
         </div>
-        <div class="card-actions">
+        <div class="card-actions" [class.always-visible]="editMode">
           <button 
             class="action-btn"
             (click)="onEdit($event)"
@@ -54,9 +60,13 @@ import { QuickLink } from '../../models/link.model';
         </div>
       </div>
 
-      <div class="card-hover-overlay">
+      <div class="card-hover-overlay" *ngIf="!editMode">
         <i class="fas fa-external-link-alt"></i>
         <span>Open Link</span>
+      </div>
+      
+      <div class="drag-indicator" *ngIf="editMode">
+        <i class="fas fa-grip-vertical"></i>
       </div>
     </div>
   `,
@@ -111,7 +121,8 @@ import { QuickLink } from '../../models/link.model';
       transition: opacity 0.2s ease;
     }
 
-    .link-card:hover .card-actions {
+    .link-card:hover .card-actions,
+    .card-actions.always-visible {
       opacity: 1;
     }
 
@@ -229,6 +240,32 @@ import { QuickLink } from '../../models/link.model';
       opacity: 0.95;
     }
 
+    .link-card.edit-mode {
+      cursor: grab;
+      transform: scale(1.02);
+    }
+
+    .link-card.edit-mode:active {
+      cursor: grabbing;
+    }
+
+    .drag-indicator {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 0.5rem;
+      background-color: var(--primary-color);
+      color: white;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      opacity: 0.8;
+      z-index: 10;
+    }
+
     @media (max-width: 640px) {
       .link-card {
         min-height: 160px;
@@ -252,8 +289,11 @@ import { QuickLink } from '../../models/link.model';
 })
 export class LinkCardComponent {
   @Input() link!: QuickLink;
+  @Input() editMode = false;
+  @Input() index = 0;
   @Output() edit = new EventEmitter<QuickLink>();
   @Output() delete = new EventEmitter<string>();
+  @Output() reorder = new EventEmitter<{ fromIndex: number; toIndex: number }>();
 
   openLink() {
     window.open(this.link.url, '_blank', 'noopener,noreferrer');
@@ -275,6 +315,30 @@ export class LinkCardComponent {
       return url.hostname;
     } catch {
       return this.link.url;
+    }
+  }
+
+  onDragStart(event: DragEvent) {
+    if (!this.editMode) {
+      event.preventDefault();
+      return;
+    }
+    event.dataTransfer?.setData('text/plain', this.index.toString());
+  }
+
+  onDragOver(event: DragEvent) {
+    if (!this.editMode) return;
+    event.preventDefault();
+  }
+
+  onDrop(event: DragEvent) {
+    if (!this.editMode) return;
+    event.preventDefault();
+    const fromIndex = parseInt(event.dataTransfer?.getData('text/plain') || '0');
+    const toIndex = this.index;
+    
+    if (fromIndex !== toIndex) {
+      this.reorder.emit({ fromIndex, toIndex });
     }
   }
 }
